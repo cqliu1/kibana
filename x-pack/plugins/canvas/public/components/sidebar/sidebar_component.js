@@ -4,26 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiTitle,
-  EuiSpacer,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTabbedContent,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 import { Datasource } from '../datasource';
 import { FunctionFormList } from '../function_form_list';
+import { SidebarHeader } from '../sidebar_header';
 
-export const SidebarComponent = ({
-  selectedElement,
-  duplicateElement,
-  elementLayer,
-  elementIsSelected,
-}) => {
+export const SidebarComponent = ({ selectedElement }) => {
+  const elementIsSelected = Boolean(selectedElement);
   const tabs = [
     {
       id: 'edit',
@@ -52,74 +41,10 @@ export const SidebarComponent = ({
   return (
     <div className="canvasSidebar">
       {elementIsSelected && (
-        <div>
-          <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="s">
-                <h3>Selected layer</h3>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="none">
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup alignItems="center" gutterSize="none">
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip position="bottom" content="Move element to top layer">
-                        <EuiButtonIcon
-                          color="text"
-                          iconType="sortUp"
-                          onClick={() => elementLayer(Infinity)}
-                          aria-label="Move element to top layer"
-                        />
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip position="bottom" content="Move element up one layer">
-                        <EuiButtonIcon
-                          color="text"
-                          iconType="arrowUp"
-                          onClick={() => elementLayer(1)}
-                          aria-label="Move element up one layer"
-                        />
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip position="bottom" content="Move element down one layer">
-                        <EuiButtonIcon
-                          color="text"
-                          iconType="arrowDown"
-                          onClick={() => elementLayer(-1)}
-                          aria-label="Move element down one layer"
-                        />
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip position="bottom" content="Move element to bottom layer">
-                        <EuiButtonIcon
-                          color="text"
-                          iconType="sortDown"
-                          onClick={() => elementLayer(-Infinity)}
-                          aria-label="Move element to bottom layer"
-                        />
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip position="bottom" content="Clone the selected element">
-                        <EuiButtonIcon
-                          color="text"
-                          iconType="copy"
-                          onClick={() => duplicateElement()}
-                          aria-label="Clone the selected element"
-                        />
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <Fragment>
+          <SidebarHeader />
           <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} size="s" />
-        </div>
+        </Fragment>
       )}
     </div>
   );
@@ -127,7 +52,4 @@ export const SidebarComponent = ({
 
 SidebarComponent.propTypes = {
   selectedElement: PropTypes.object,
-  duplicateElement: PropTypes.func.isRequired,
-  elementLayer: PropTypes.func,
-  elementIsSelected: PropTypes.bool.isRequired,
 };

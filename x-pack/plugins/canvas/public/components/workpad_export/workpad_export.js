@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { Popover } from '../popover';
 import { Clipboard } from '../clipboard';
+import { flattenPanelTree } from '../../lib/flatten_panel_tree';
 
 export class WorkpadExport extends React.PureComponent {
   static propTypes = {
@@ -28,21 +29,6 @@ export class WorkpadExport extends React.PureComponent {
   };
 
   anchorElement = React.createRef();
-
-  flattenPanelTree(tree, array = []) {
-    array.push(tree);
-
-    if (tree.items) {
-      tree.items.forEach(item => {
-        if (item.panel) {
-          this.flattenPanelTree(item.panel, array);
-          item.panel = item.panel.id;
-        }
-      });
-    }
-
-    return array;
-  }
 
   exportPdf = () => {
     this.props.onExport('pdf');
@@ -174,7 +160,7 @@ export class WorkpadExport extends React.PureComponent {
         {({ closePopover }) => (
           <EuiContextMenu
             initialPanelId={0}
-            panels={this.flattenPanelTree(this.renderPanelTree(closePopover))}
+            panels={flattenPanelTree(this.renderPanelTree(closePopover))}
           />
         )}
       </Popover>
