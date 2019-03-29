@@ -44,14 +44,14 @@ export const SidebarHeader = ({
   const groupMenuItem = groupIsSelected
     ? {
         name: 'Ungroup',
-        icon: 'empty', // TODO: need group icons
+        icon: 'empty', // TODO: need ungroup icon
         onClick: () => {
           ungroupElements();
         },
       }
     : {
         name: 'Group',
-        icon: 'empty', // TODO: need ungroup icons
+        icon: 'empty', // TODO: need group icon
         onClick: () => {
           groupElements();
         },
@@ -102,6 +102,7 @@ export const SidebarHeader = ({
         },
       },
       groupMenuItem,
+      // TODO: how do we add a <hr> between EUI context menu items in this panel tree?
       {
         name: 'Bring to front', // TODO: check against current element position and disable if already top layer
         icon: 'sortUp',
