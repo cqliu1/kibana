@@ -139,24 +139,24 @@ const elementHandlers = {
       removeElements(selectedPage)(selectedElementIds);
     }
   },
-  saveCustomElement: ({ selectedElements, selectedPrimaryShapes }) => () => {
+  saveCustomElement: ({ selectedElements, selectedPrimaryShapes }) => (name, description) => {
     if (selectedElements.length) {
       const content = JSON.stringify({ selectedElements, rootShapes: selectedPrimaryShapes });
       const customElement = {
-        content,
+        name,
+        description,
         image: 'image-preview', // TODO: store a snapshot of the rendered element (how?...)
-        name: 'custom-name', // TODO: prompt user to name custom element in a modal?
+        content,
       };
       customElementService
         .create(customElement)
-        .then(result =>
-          result.ok
-            ? notify.success(
-                `Custom element '${customElement.name || customElement.id}' was successfully saved`
-              )
-            : notify.warning(
-                `Custom element '${customElement.name || customElement.id}' was not saved`
-              )
+        .then(() =>
+          notify.success(`Custom element '${customElement.name || customElement.id}' was saved`)
+        )
+        .catch(result =>
+          notify.warning(result, {
+            title: `Custom element '${customElement.name || customElement.id}' was not saved`,
+          })
         );
     }
   },

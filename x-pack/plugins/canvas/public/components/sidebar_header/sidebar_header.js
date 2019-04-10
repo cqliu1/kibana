@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { flattenPanelTree } from '../../lib/flatten_panel_tree';
 import { Popover } from '../popover';
+import { CustomElementModal } from './custom_element_modal';
 
 const contextMenuButton = handleClick => (
   <EuiButtonIcon
@@ -26,205 +27,241 @@ const contextMenuButton = handleClick => (
   />
 );
 
-export const SidebarHeader = ({
-  duplicateElement,
-  groupIsSelected,
-  groupElements,
-  ungroupElements,
-  copyElements,
-  cutElements,
-  pasteElements,
-  removeElements,
-  bringToFront,
-  bringForward,
-  sendBackward,
-  sendToBack,
-  saveCustomElement,
-}) => {
-  const groupMenuItem = groupIsSelected
-    ? {
-        name: 'Ungroup',
-        icon: 'empty', // TODO: need ungroup icon
-        onClick: () => {
-          ungroupElements();
-        },
-      }
-    : {
-        name: 'Group',
-        icon: 'empty', // TODO: need group icon
-        onClick: () => {
-          groupElements();
-        },
-      };
+export class SidebarHeader extends PureComponent {
+  state = {
+    isModalVisible: false,
+  };
 
-  // TODO: add keyboard shortcuts to each menu item
-  const renderPanelTree = closePopover => ({
-    id: 0,
-    title: 'Element options',
-    items: [
-      {
-        name: 'Copy',
-        icon: 'copy',
-        onClick: () => {
-          copyElements();
-        },
-      },
-      {
-        name: 'Cut',
-        icon: 'empty', // TODO: need a cut icon
-        onClick: () => {
-          closePopover();
-          cutElements();
-        },
-      },
-      {
-        name: 'Paste', // TODO: can this be disabled if clipboard is empty?
-        icon: 'copyClipboard',
-        onClick: () => {
-          closePopover();
-          pasteElements();
-        },
-      },
-      {
-        name: 'Delete',
-        icon: 'trash',
-        onClick: () => {
-          closePopover();
-          removeElements();
-        },
-      },
-      {
-        name: 'Duplicate',
-        icon: 'copy',
-        onClick: () => {
-          closePopover();
-          duplicateElement();
-        },
-      },
-      groupMenuItem,
-      // TODO: how do we add a <hr> between EUI context menu items in this panel tree?
-      {
-        name: 'Bring to front', // TODO: check against current element position and disable if already top layer
-        icon: 'sortUp',
-        onClick: () => {
-          bringToFront();
-        },
-      },
-      {
-        name: 'Bring forward', // TODO: check against current element position and disable if already top layer
-        icon: 'arrowUp',
-        onClick: () => {
-          bringForward();
-        },
-      },
-      {
-        name: 'Send backward', // TODO: check against current element position and disable if already bottom layer
-        icon: 'arrowDown',
-        onClick: () => {
-          sendBackward();
-        },
-      },
-      {
-        name: 'Send to back', // TODO: check against current element position and disable if already bottom layer
-        icon: 'sortDown',
-        onClick: () => {
-          sendToBack();
-        },
-      },
-      {
-        name: 'Save as custom element',
-        icon: 'save',
-        onClick: () => {
-          saveCustomElement();
-        },
-      },
-    ],
-  });
+  componentDidMount() {
+    this._isMounted = true;
+  }
 
-  const contextMenu = (
-    <Popover
-      id="sidebar-context-menu-popover"
-      className="canvasSidebarContextMenu"
-      anchorClassName="canvasSidebarContextMenu__anchor" // TODO: remove if we don't actually need this selector
-      button={contextMenuButton}
-      panelPaddingSize="none"
-      tooltip="Element menu" // TODO: what should this tooltip say?
-      tooltipPosition="bottom"
-    >
-      {({ closePopover }) => (
-        <EuiContextMenu
-          initialPanelId={0}
-          panels={flattenPanelTree(renderPanelTree(closePopover))}
-        />
-      )}
-    </Popover>
-  );
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
 
-  return (
-    <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="spaceBetween">
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="s">
-          <h3>Selected layer</h3>
-        </EuiTitle>
-      </EuiFlexItem>
-      {/* <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" gutterSize="none"> */}
-      <EuiFlexItem grow={false}>{contextMenu}</EuiFlexItem>
-      {/* <EuiFlexItem grow={false}>
-            <EuiToolTip position="bottom" content="Move element to top layer">
-              <EuiButtonIcon
-                color="text"
-                iconType="sortUp"
-                onClick={() => elementLayer(Infinity)}
-                aria-label="Move element to top layer"
-              />
-            </EuiToolTip>
+  showModal = () => this._isMounted && this.setState({ isModalVisible: true });
+  closeModal = () => this._isMounted && this.setState({ isModalVisible: false });
+
+  render() {
+    const {
+      duplicateElement,
+      groupIsSelected,
+      groupElements,
+      ungroupElements,
+      copyElements,
+      cutElements,
+      pasteElements,
+      removeElements,
+      bringToFront,
+      bringForward,
+      sendBackward,
+      sendToBack,
+      saveCustomElement,
+    } = this.props;
+
+    const topBorderClassName = 'canvasContextMenu--topBorder';
+
+    const groupMenuItem = groupIsSelected
+      ? {
+          name: 'Ungroup',
+          className: topBorderClassName,
+          onClick: () => {
+            ungroupElements();
+          },
+        }
+      : {
+          name: 'Group',
+          className: topBorderClassName,
+          onClick: () => {
+            groupElements();
+          },
+        };
+
+    // TODO: add keyboard shortcuts to each menu item
+    const renderPanelTree = closePopover => ({
+      id: 0,
+      title: 'Element options',
+      items: [
+        {
+          name: 'Copy',
+          icon: 'copy',
+          onClick: () => {
+            copyElements();
+          },
+        },
+        {
+          name: 'Cut',
+          icon: 'empty', // TODO: need a cut icon
+          onClick: () => {
+            closePopover();
+            cutElements();
+          },
+        },
+        {
+          name: 'Paste', // TODO: can this be disabled if clipboard is empty?
+          icon: 'copyClipboard',
+          onClick: () => {
+            closePopover();
+            pasteElements();
+          },
+        },
+        {
+          name: 'Delete',
+          icon: 'trash',
+          onClick: () => {
+            closePopover();
+            removeElements();
+          },
+        },
+        {
+          name: 'Clone',
+          onClick: () => {
+            closePopover();
+            duplicateElement();
+          },
+        },
+        groupMenuItem,
+        // TODO: how do we add a <hr> between EUI context menu items in this panel tree?
+        {
+          name: 'Order',
+          panel: {
+            id: 1,
+            title: 'Order',
+            items: [
+              {
+                name: 'Bring to front', // TODO: check against current element position and disable if already top layer
+                icon: 'sortUp',
+                onClick: () => {
+                  bringToFront();
+                },
+              },
+              {
+                name: 'Bring forward', // TODO: check against current element position and disable if already top layer
+                icon: 'arrowUp',
+                onClick: () => {
+                  bringForward();
+                },
+              },
+              {
+                name: 'Send backward', // TODO: check against current element position and disable if already bottom layer
+                icon: 'arrowDown',
+                onClick: () => {
+                  sendBackward();
+                },
+              },
+              {
+                name: 'Send to back', // TODO: check against current element position and disable if already bottom layer
+                icon: 'sortDown',
+                onClick: () => {
+                  sendToBack();
+                },
+              },
+            ],
+          },
+        },
+        {
+          name: 'Save as custom element',
+          icon: 'save',
+          className: topBorderClassName,
+          onClick: () => {
+            this.showModal();
+          },
+        },
+      ],
+    });
+
+    const contextMenu = (
+      <Popover
+        id="sidebar-context-menu-popover"
+        className="canvasContextMenu"
+        button={contextMenuButton}
+        panelPaddingSize="none"
+        tooltip="Element options" // TODO: what should this tooltip say?
+        tooltipPosition="bottom"
+      >
+        {({ closePopover }) => (
+          <EuiContextMenu
+            initialPanelId={0}
+            panels={flattenPanelTree(renderPanelTree(closePopover))}
+          />
+        )}
+      </Popover>
+    );
+
+    return (
+      <Fragment>
+        <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="s">
+              <h3>Selected layer</h3>
+            </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiToolTip position="bottom" content="Move element up one layer">
-              <EuiButtonIcon
-                color="text"
-                iconType="arrowUp"
-                onClick={() => elementLayer(1)}
-                aria-label="Move element up one layer"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip position="bottom" content="Move element down one layer">
-              <EuiButtonIcon
-                color="text"
-                iconType="arrowDown"
-                onClick={() => elementLayer(-1)}
-                aria-label="Move element down one layer"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip position="bottom" content="Move element to bottom layer">
-              <EuiButtonIcon
-                color="text"
-                iconType="sortDown"
-                onClick={() => elementLayer(-Infinity)}
-                aria-label="Move element to bottom layer"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip position="bottom" content="Clone the selected element">
-              <EuiButtonIcon
-                color="text"
-                iconType="copy"
-                onClick={() => duplicateElement()}
-                aria-label="Clone the selected element"
-              />
-            </EuiToolTip>
+            <EuiFlexGroup alignItems="center" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <EuiToolTip position="bottom" content="Save as custom element">
+                  <EuiButtonIcon
+                    color="text"
+                    iconType="save"
+                    onClick={this.showModal}
+                    aria-label="Save as custom element"
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{contextMenu}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip position="bottom" content="Move element to top layer">
+                  <EuiButtonIcon
+                    color="text"
+                    iconType="sortUp"
+                    onClick={() => bringToFront()}
+                    aria-label="Move element to top layer"
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip position="bottom" content="Move element up one layer">
+                  <EuiButtonIcon
+                    color="text"
+                    iconType="arrowUp"
+                    onClick={() => bringForward()}
+                    aria-label="Move element up one layer"
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip position="bottom" content="Move element down one layer">
+                  <EuiButtonIcon
+                    color="text"
+                    iconType="arrowDown"
+                    onClick={() => sendBackward()}
+                    aria-label="Move element down one layer"
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip position="bottom" content="Move element to bottom layer">
+                  <EuiButtonIcon
+                    color="text"
+                    iconType="sortDown"
+                    onClick={() => sendToBack()}
+                    aria-label="Move element to bottom layer"
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlexItem> */}
-    </EuiFlexGroup>
-  );
-};
+        <CustomElementModal
+          isOpen={this.state.isModalVisible}
+          onSave={saveCustomElement}
+          onClose={this.closeModal}
+        />
+      </Fragment>
+    );
+  }
+}
 
 SidebarHeader.propTypes = {
   groupIsSelected: PropTypes.bool.isRequired,
