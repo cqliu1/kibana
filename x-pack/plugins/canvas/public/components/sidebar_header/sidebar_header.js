@@ -85,7 +85,7 @@ export class SidebarHeader extends PureComponent {
       items: [
         {
           name: 'Cut',
-          icon: 'empty', // TODO: need a cut icon
+          icon: 'cut',
           onClick: () => {
             closePopover();
             cutElements();
@@ -161,8 +161,8 @@ export class SidebarHeader extends PureComponent {
           },
         },
         {
-          name: 'Save as custom element',
-          icon: 'save',
+          name: 'Save as new element',
+          icon: 'indexOpen',
           className: topBorderClassName,
           onClick: () => {
             this.showModal();
@@ -199,17 +199,6 @@ export class SidebarHeader extends PureComponent {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="none">
-              <EuiFlexItem grow={false}>
-                <EuiToolTip position="bottom" content="Save as custom element">
-                  <EuiButtonIcon
-                    color="text"
-                    iconType="save"
-                    onClick={this.showModal}
-                    aria-label="Save as custom element"
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>{contextMenu}</EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiToolTip position="bottom" content="Move element to top layer">
                   <EuiButtonIcon
@@ -250,6 +239,17 @@ export class SidebarHeader extends PureComponent {
                   />
                 </EuiToolTip>
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip position="bottom" content="Save as new element">
+                  <EuiButtonIcon
+                    color="text"
+                    iconType="indexOpen"
+                    onClick={this.showModal}
+                    aria-label="Save as new element"
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{contextMenu}</EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
