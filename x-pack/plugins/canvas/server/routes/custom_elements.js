@@ -75,7 +75,7 @@ export function customElements(server) {
       sortOrder: 'desc',
       search: name ? `${name}* | ${name}` : '*',
       searchFields: ['name'],
-      fields: ['id', 'name', 'image', '@created', '@timestamp'],
+      fields: ['id', 'name', 'displayName', 'help', 'image', 'content', '@created', '@timestamp'],
       page,
       perPage,
     });

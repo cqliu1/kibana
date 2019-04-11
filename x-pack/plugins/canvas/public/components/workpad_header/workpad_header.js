@@ -59,12 +59,7 @@ export class WorkpadHeader extends React.PureComponent {
           maxWidth="1000px"
           initialFocus=".canvasElements__filter"
         >
-          <ElementTypes
-            onClick={element => {
-              addElement(element);
-              setShowElementModal(false);
-            }}
-          />
+          <ElementTypes addElement={addElement} onClose={() => setShowElementModal(false)} />
           <EuiModalFooter>
             <EuiButton size="s" onClick={() => setShowElementModal(false)}>
               Close

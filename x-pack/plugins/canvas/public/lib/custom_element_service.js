@@ -25,5 +25,5 @@ export const find = searchTerm => {
 
   return fetch
     .get(`${apiPath}/find?name=${validSearchTerm ? searchTerm : ''}&perPage=10000`)
-    .then(({ data: workpads }) => workpads);
+    .then(({ data: customElements }) => customElements);
 };

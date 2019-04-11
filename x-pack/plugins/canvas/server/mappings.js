@@ -33,6 +33,7 @@ export const mappings = {
           },
         },
       },
+      help: { type: 'text' },
       content: { type: 'text' },
       image: { type: 'text' },
       '@timestamp': { type: 'date' },

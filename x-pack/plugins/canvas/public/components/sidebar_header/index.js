@@ -139,12 +139,16 @@ const elementHandlers = {
       removeElements(selectedPage)(selectedElementIds);
     }
   },
-  saveCustomElement: ({ selectedElements, selectedPrimaryShapes }) => (name, description) => {
+  saveCustomElement: ({ selectedElements, selectedPrimaryShapes }) => (name = '', help) => {
     if (selectedElements.length) {
       const content = JSON.stringify({ selectedElements, rootShapes: selectedPrimaryShapes });
       const customElement = {
-        name,
-        description,
+        name: name
+          .toLowerCase()
+          .split(' ')
+          .join('-'),
+        displayName: name,
+        help,
         image: 'image-preview', // TODO: store a snapshot of the rendered element (how?...)
         content,
       };

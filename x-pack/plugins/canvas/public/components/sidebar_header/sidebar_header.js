@@ -84,18 +84,18 @@ export class SidebarHeader extends PureComponent {
       title: 'Element options',
       items: [
         {
-          name: 'Copy',
-          icon: 'copy',
-          onClick: () => {
-            copyElements();
-          },
-        },
-        {
           name: 'Cut',
           icon: 'empty', // TODO: need a cut icon
           onClick: () => {
             closePopover();
             cutElements();
+          },
+        },
+        {
+          name: 'Copy',
+          icon: 'copy',
+          onClick: () => {
+            copyElements();
           },
         },
         {
@@ -253,11 +253,9 @@ export class SidebarHeader extends PureComponent {
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <CustomElementModal
-          isOpen={this.state.isModalVisible}
-          onSave={saveCustomElement}
-          onClose={this.closeModal}
-        />
+        {this.state.isModalVisible && (
+          <CustomElementModal onSave={saveCustomElement} onClose={this.closeModal} />
+        )}
       </Fragment>
     );
   }

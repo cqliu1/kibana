@@ -12,7 +12,6 @@ import {
   EuiModalBody,
   EuiOverlayMask,
   EuiFormRow,
-  EuiTitle,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,6 +19,8 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiTextArea,
+  EuiModalHeaderTitle,
+  EuiModalHeader,
 } from '@elastic/eui';
 
 const MAX_NAME_LENGTH = 25;
@@ -35,25 +36,9 @@ export class CustomElementModal extends Component {
     this.setState({ [type]: value });
   };
 
-  handleSave = () => {
-    const { onSave } = this.props;
-    const { name, description } = this.state;
-    onSave && onSave(name, description);
-  };
-
-  handleClose = ev => {
-    const { onClose } = this.props;
-    onClose && onClose(ev);
-  };
-
   render() {
-    const { isOpen, className, onSave, onClose, ...rest } = this.props;
+    const { className, onSave, onClose, ...rest } = this.props;
     const { name, description } = this.state;
-
-    // render nothing if this component isn't open
-    if (!isOpen) {
-      return null;
-    }
 
     return (
       <EuiOverlayMask>
@@ -63,12 +48,14 @@ export class CustomElementModal extends Component {
           maxWidth="1000px"
           onClose={onClose}
         >
+          <EuiModalHeader>
+            <EuiModalHeaderTitle size="m">
+              <h3>Create new element</h3>
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
           <EuiModalBody>
             <EuiFlexGroup>
               <EuiFlexItem>
-                <EuiTitle size="m">
-                  <h3>Create new element</h3>
-                </EuiTitle>
                 <EuiFormRow
                   label="Name"
                   helpText={`${MAX_NAME_LENGTH - name.length} characters remaining`}
@@ -96,7 +83,13 @@ export class CustomElementModal extends Component {
                 <EuiFormRow>
                   <EuiFlexGroup>
                     <EuiFlexItem grow={false}>
-                      <EuiButton fill onClick={() => onSave(name, description)}>
+                      <EuiButton
+                        fill
+                        onClick={() => {
+                          onSave(name, description);
+                          onClose();
+                        }}
+                      >
                         Save
                       </EuiButton>
                     </EuiFlexItem>
