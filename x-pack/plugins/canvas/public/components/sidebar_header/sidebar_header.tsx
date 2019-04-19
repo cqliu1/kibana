@@ -286,9 +286,9 @@ export class SidebarHeader extends PureComponent<Props> {
 
     return (
       <Fragment>
-        <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexGroup className="canvasLayout__sidebarHeader" gutterSize="none" alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
+            <EuiTitle size="xs">
               <h3>{title}</h3>
             </EuiTitle>
           </EuiFlexItem>

@@ -11,6 +11,7 @@ import PropTypes from 'prop-types';
 import {
   EuiModal,
   EuiModalBody,
+  EuiModalFooter,
   EuiOverlayMask,
   EuiFormRow,
   EuiFieldText,
@@ -18,7 +19,10 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
+  EuiSpacer,
   EuiTextArea,
+  EuiText,
+  EuiTitle,
   EuiModalHeaderTitle,
   EuiModalHeader,
   EuiIcon,
@@ -30,8 +34,8 @@ import {
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
 import { encode } from '../../../common/lib/dataurl';
 
-const MAX_NAME_LENGTH = 25;
-const MAX_DESCRIPTION_LENGTH = 70;
+const MAX_NAME_LENGTH = 20;
+const MAX_DESCRIPTION_LENGTH = 100;
 
 export interface Props {
   /**
@@ -96,8 +100,8 @@ export class CustomElementModal extends PureComponent<Props> {
       <EuiOverlayMask>
         <EuiModal
           {...rest}
-          className={`canvasCustomElementModal canvasModal--fixedSize`}
-          maxWidth="1000px"
+          className={`canvasCustomElementModal`}
+          maxWidth={700}
           onClose={onCancel}
           initialFocus=".canvasCustomElementForm__name"
         >
@@ -107,8 +111,8 @@ export class CustomElementModal extends PureComponent<Props> {
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
-            <EuiFlexGroup>
-              <EuiFlexItem>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
+              <EuiFlexItem className="canvasCustomElementForm" grow={2}>
                 <EuiFormRow
                   label="Name"
                   helpText={`${MAX_NAME_LENGTH - name.length} characters remaining`}
@@ -130,13 +134,14 @@ export class CustomElementModal extends PureComponent<Props> {
                 >
                   <EuiTextArea
                     value={description}
+                    rows={2}
                     onChange={e =>
                       e.target.value.length <= MAX_DESCRIPTION_LENGTH &&
                       this._handleChange('description', e.target.value)
                     }
                   />
                 </EuiFormRow>
-                <EuiFormRow label="Description" compressed>
+                <EuiFormRow className="canvasCustomElementForm__thumbnail" label="Thumbnail image" compressed>
                   <EuiFilePicker
                     initialPromptText="Select or drag and drop an image"
                     onChange={this._handleUpload}
@@ -144,36 +149,44 @@ export class CustomElementModal extends PureComponent<Props> {
                     accept="image/*"
                   />
                 </EuiFormRow>
-                <EuiFormRow>
-                  <EuiFlexGroup>
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        fill
-                        onClick={() => {
-                          onSave(name, description, image);
-                          onCancel();
-                        }}
-                      >
-                        Save
-                      </EuiButton>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty onClick={onCancel}>Cancel</EuiButtonEmpty>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFormRow>
+                <EuiText className="canvasCustomElementForm__thumbnailHelp" size="xs">
+                  <p>Take a screenshot of your element and upload it here. This can also be done after saving.</p>
+                </EuiText>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem className="canvasElementCard canvasCustomElementForm__preview" grow={1}>
+                <EuiTitle size="xxxs">
+                  <h4>Element preview</h4>
+                </EuiTitle>
+                <EuiSpacer size="s" />
                 <EuiCard
                   textAlign="left"
                   image={image || null}
                   icon={image ? null : <EuiIcon type="canvasApp" size="xxl" />}
                   title={name}
                   description={description}
+                  className={image ? 'canvasCard' : 'canvasCard canvasCard--hasIcon'}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiModalBody>
+          <EuiModalFooter>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={onCancel}>Cancel</EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  onClick={() => {
+                    onSave(name, description, image);
+                    onCancel();
+                  }}
+                >
+                  Save
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiModalFooter>
         </EuiModal>
       </EuiOverlayMask>
     );

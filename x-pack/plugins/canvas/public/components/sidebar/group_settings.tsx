@@ -13,8 +13,9 @@ export const GroupSettings: FunctionComponent = () => (
   <Fragment>
     <SidebarHeader title="Grouped element" groupIsSelected showLayerControls={false} />
     <EuiSpacer />
-    <EuiText>
-      <p>Ungroup (U) these layers to edit their individual settings</p>
+    <EuiText size="s">
+      <p>Ungroup (U) to edit individual element settings.</p>
+      <p>Save this group as a new element to re-use it throughout your workpad.</p>
     </EuiText>
   </Fragment>
 );

@@ -13,15 +13,12 @@ export const MultiElementSettings: FunctionComponent = () => (
   <Fragment>
     <SidebarHeader title="Multiple elements" showLayerControls={false} />
     <EuiSpacer />
-    <EuiText>
-      <p>Multiple elements are selected.</p>
-    </EuiText>
-    <EuiSpacer />
-    <EuiText>
+    <EuiText size="s">
+      <p>Multiple elements are currently selected.</p>
       <p>
-        Deselect these elements to edit their settings or press (G) to group them. Grouped elements
-        can be saved as a new, reusable element.
-      </p>
+        Deselect these elements to edit their individual settings, press (G) to
+        group them, or save this selection as a new element to re-use it
+        throughout your workpad.</p>
     </EuiText>
   </Fragment>
 );

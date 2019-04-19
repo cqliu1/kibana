@@ -73,7 +73,7 @@ export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
 
   return (
     <Fragment>
-      <SidebarHeader title="Selected layer" />
+      <SidebarHeader title="Selected element" />
       <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} size="s" />
     </Fragment>
   );
