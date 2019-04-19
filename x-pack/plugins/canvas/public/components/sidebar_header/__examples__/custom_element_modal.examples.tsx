@@ -8,6 +8,7 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { CustomElementModal } from '../custom_element_modal';
+// @ts-ignore
 import { elasticLogo } from '../../../lib/elastic_logo';
 
 storiesOf('components/SidebarHeader/CustomElementModal', module)

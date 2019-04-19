@@ -5,6 +5,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
+// @ts-ignore
 import { SidebarContent } from './sidebar_content';
 
 export const Sidebar: FunctionComponent = () => (

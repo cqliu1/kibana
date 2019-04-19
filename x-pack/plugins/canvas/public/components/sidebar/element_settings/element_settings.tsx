@@ -11,6 +11,7 @@ import { EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 import { Datasource } from '../../datasource';
 // @ts-ignore
 import { FunctionFormList } from '../../function_form_list';
+// @ts-ignore
 import { SidebarHeader } from '../../sidebar_header';
 
 export interface Element {

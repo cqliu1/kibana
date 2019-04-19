@@ -14,7 +14,9 @@ import {
   EuiContextMenu,
   EuiToolTip,
 } from '@elastic/eui';
+// @ts-ignore
 import { flattenPanelTree } from '../../lib/flatten_panel_tree';
+// @ts-ignore
 import { Popover } from '../popover';
 import { CustomElementModal } from './custom_element_modal';
 
@@ -272,7 +274,7 @@ export class SidebarHeader extends PureComponent<Props> {
       tooltip="Element options"
       tooltipPosition="bottom"
     >
-      {({ closePopover }) => (
+      {({ closePopover }: { closePopover: () => void }) => (
         <EuiContextMenu
           initialPanelId={0}
           panels={flattenPanelTree(this._renderPanelTree(closePopover))}
@@ -286,7 +288,12 @@ export class SidebarHeader extends PureComponent<Props> {
 
     return (
       <Fragment>
-        <EuiFlexGroup className="canvasLayout__sidebarHeader" gutterSize="none" alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexGroup
+          className="canvasLayout__sidebarHeader"
+          gutterSize="none"
+          alignItems="center"
+          justifyContent="spaceBetween"
+        >
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
               <h3>{title}</h3>
