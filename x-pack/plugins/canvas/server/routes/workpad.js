@@ -16,7 +16,6 @@ import { getId } from '../../public/lib/get_id';
 import { formatResponse as formatRes } from '../lib/format_response';
 
 export function workpad(server) {
-  //const config = server.config();
   const { errors: esErrors } = server.plugins.elasticsearch.getCluster('data');
   const routePrefix = API_ROUTE_WORKPAD;
   const routePrefixAssets = API_ROUTE_WORKPAD_ASSETS;
