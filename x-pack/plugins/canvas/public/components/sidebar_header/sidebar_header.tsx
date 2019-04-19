@@ -18,6 +18,8 @@ import { flattenPanelTree } from '../../lib/flatten_panel_tree';
 import { Popover } from '../popover';
 import { CustomElementModal } from './custom_element_modal';
 
+const topBorderClassName = 'canvasContextMenu--topBorder';
+
 export interface Props {
   title: string;
   showLayerControls?: boolean;
@@ -87,156 +89,200 @@ export class SidebarHeader extends PureComponent<Props> {
     this._isMounted = false;
   }
 
-  render() {
+  private _renderLayoutControls = () => {
+    const { bringToFront, bringForward, sendBackward, sendToBack } = this.props;
+    return (
+      <Fragment>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip position="bottom" content="Move element to top layer">
+            <EuiButtonIcon
+              color="text"
+              iconType="sortUp"
+              onClick={bringToFront}
+              aria-label="Move element to top layer"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip position="bottom" content="Move element up one layer">
+            <EuiButtonIcon
+              color="text"
+              iconType="arrowUp"
+              onClick={bringForward}
+              aria-label="Move element up one layer"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip position="bottom" content="Move element down one layer">
+            <EuiButtonIcon
+              color="text"
+              iconType="arrowDown"
+              onClick={sendBackward}
+              aria-label="Move element down one layer"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip position="bottom" content="Move element to bottom layer">
+            <EuiButtonIcon
+              color="text"
+              iconType="sortDown"
+              onClick={sendToBack}
+              aria-label="Move element to bottom layer"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      </Fragment>
+    );
+  };
+
+  private _getLayerMenuItems = () => {
+    const { bringToFront, bringForward, sendBackward, sendToBack } = this.props;
+
+    return {
+      name: 'Order',
+      className: topBorderClassName,
+      panel: {
+        id: 1,
+        title: 'Order',
+        items: [
+          {
+            name: 'Bring to front', // TODO: check against current element position and disable if already top layer
+            icon: 'sortUp',
+            onClick: () => bringToFront(),
+          },
+          {
+            name: 'Bring forward', // TODO: same as above
+            icon: 'arrowUp',
+            onClick: () => bringForward(),
+          },
+          {
+            name: 'Send backward', // TODO: check against current element position and disable if already bottom layer
+            icon: 'arrowDown',
+            onClick: () => sendBackward(),
+          },
+          {
+            name: 'Send to back', // TODO: same as above
+            icon: 'sortDown',
+            onClick: () => sendToBack(),
+          },
+        ],
+      },
+    };
+  };
+
+  // TODO: restore when group and ungroup can be triggered outside of workpad_page
+  // private _getGroupMenuItem = () => {
+  //   const { groupIsSelected, ungroupNodes, groupNodes } = this.props;
+  //   return groupIsSelected
+  //     ? {
+  //         name: 'Ungroup',
+  //         className: topBorderClassName,
+  //         onClick: () => {
+  //           ungroupNodes();
+  //         },
+  //       }
+  //     : {
+  //         name: 'Group',
+  //         className: topBorderClassName,
+  //         onClick: () => {
+  //           groupNodes();
+  //         },
+  //       };
+  // };
+
+  private _renderPanelTree = (closePopover: () => void) => {
     const {
-      title,
       showLayerControls,
       cutNodes,
       copyNodes,
       pasteNodes,
       deleteNodes,
       cloneNodes,
-      bringToFront,
-      bringForward,
-      sendBackward,
-      sendToBack,
-      createCustomElement,
-      // TODO: restore when group and ungroup can be triggered outside of workpad_page
-      // groupIsSelected,
-      // groupNodes,
-      // ungroupNodes,
     } = this.props;
 
-    const topBorderClassName = 'canvasContextMenu--topBorder';
-
-    // TODO: restore when group and ungroup can be triggered outside of workpad_page
-    // const groupMenuItem = groupIsSelected
-    //   ? {
-    //       name: 'Ungroup',
-    //       className: topBorderClassName,
-    //       onClick: () => {
-    //         ungroupNodes();
-    //       },
-    //     }
-    //   : {
-    //       name: 'Group',
-    //       className: topBorderClassName,
-    //       onClick: () => {
-    //         groupNodes();
-    //       },
-    //     };
-
-    // TODO: add keyboard shortcuts to each menu item
-    const renderPanelTree = (closePopover: () => void) => {
-      const items = [
-        {
-          name: 'Cut',
-          icon: 'cut',
-          onClick: () => {
-            cutNodes();
-            closePopover();
-          },
+    const items = [
+      {
+        name: 'Cut',
+        icon: 'cut',
+        onClick: () => {
+          cutNodes();
+          closePopover();
         },
-        {
-          name: 'Copy',
-          icon: 'copy',
-          onClick: () => copyNodes(),
+      },
+      {
+        name: 'Copy',
+        icon: 'copy',
+        onClick: () => copyNodes(),
+      },
+      {
+        name: 'Paste', // TODO: can this be disabled if clipboard is empty?
+        icon: 'copyClipboard',
+        onClick: () => {
+          pasteNodes();
+          closePopover();
         },
-        {
-          name: 'Paste', // TODO: can this be disabled if clipboard is empty?
-          icon: 'copyClipboard',
-          onClick: () => {
-            pasteNodes();
-            closePopover();
-          },
+      },
+      {
+        name: 'Delete',
+        icon: 'trash',
+        onClick: () => {
+          deleteNodes();
+          closePopover();
         },
-        {
-          name: 'Delete',
-          icon: 'trash',
-          onClick: () => {
-            deleteNodes();
-            closePopover();
-          },
+      },
+      {
+        name: 'Clone',
+        onClick: () => {
+          cloneNodes();
+          closePopover();
         },
-        {
-          name: 'Clone',
-          onClick: () => {
-            cloneNodes();
-            closePopover();
-          },
-        },
-        // TODO: restore when group and ungroup can be triggered outside of workpad_page
-        // groupMenuItem,
-      ];
+      },
+      // TODO: restore when group and ungroup can be triggered outside of workpad_page
+      // this._getGroupMenuItem(),
+    ];
 
-      const layerControls = {
-        name: 'Order',
-        className: topBorderClassName,
-        panel: {
-          id: 1,
-          title: 'Order',
-          items: [
-            {
-              name: 'Bring to front', // TODO: check against current element position and disable if already top layer
-              icon: 'sortUp',
-              onClick: () => bringToFront(),
-            },
-            {
-              name: 'Bring forward', // TODO: same as above
-              icon: 'arrowUp',
-              onClick: () => bringForward(),
-            },
-            {
-              name: 'Send backward', // TODO: check against current element position and disable if already bottom layer
-              icon: 'arrowDown',
-              onClick: () => sendBackward(),
-            },
-            {
-              name: 'Send to back', // TODO: same as above
-              icon: 'sortDown',
-              onClick: () => sendToBack(),
-            },
-          ],
-        },
-      };
+    if (showLayerControls) {
+      // @ts-ignore - this is the right shape of an EUI panel tree
+      items.push(this._getLayerMenuItems());
+    }
 
-      if (showLayerControls) {
-        // @ts-ignore - this is the right shape of an EUI panel tree
-        items.push(layerControls);
-      }
+    items.push({
+      name: 'Save as new element',
+      icon: 'indexOpen',
+      // @ts-ignore - this is a valid prop
+      className: topBorderClassName,
+      onClick: this._showModal,
+    });
 
-      items.push({
-        name: 'Save as new element',
-        icon: 'indexOpen',
-        // @ts-ignore - this is a valid prop
-        className: topBorderClassName,
-        onClick: this._showModal,
-      });
-
-      return {
-        id: 0,
-        title: 'Element options',
-        items,
-      };
+    return {
+      id: 0,
+      title: 'Element options',
+      items,
     };
+  };
 
-    const contextMenu = (
-      <Popover
-        id="sidebar-context-menu-popover"
-        className="canvasContextMenu"
-        button={contextMenuButton}
-        panelPaddingSize="none"
-        tooltip="Element options"
-        tooltipPosition="bottom"
-      >
-        {({ closePopover }) => (
-          <EuiContextMenu
-            initialPanelId={0}
-            panels={flattenPanelTree(renderPanelTree(closePopover))}
-          />
-        )}
-      </Popover>
-    );
+  private _renderContextMenu = () => (
+    <Popover
+      id="sidebar-context-menu-popover"
+      className="canvasContextMenu"
+      button={contextMenuButton}
+      panelPaddingSize="none"
+      tooltip="Element options"
+      tooltipPosition="bottom"
+    >
+      {({ closePopover }) => (
+        <EuiContextMenu
+          initialPanelId={0}
+          panels={flattenPanelTree(this._renderPanelTree(closePopover))}
+        />
+      )}
+    </Popover>
+  );
+
+  render() {
+    const { title, showLayerControls, createCustomElement } = this.props;
 
     return (
       <Fragment>
@@ -248,50 +294,7 @@ export class SidebarHeader extends PureComponent<Props> {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="none">
-              {showLayerControls && (
-                <Fragment>
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip position="bottom" content="Move element to top layer">
-                      <EuiButtonIcon
-                        color="text"
-                        iconType="sortUp"
-                        onClick={bringToFront}
-                        aria-label="Move element to top layer"
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip position="bottom" content="Move element up one layer">
-                      <EuiButtonIcon
-                        color="text"
-                        iconType="arrowUp"
-                        onClick={bringForward}
-                        aria-label="Move element up one layer"
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip position="bottom" content="Move element down one layer">
-                      <EuiButtonIcon
-                        color="text"
-                        iconType="arrowDown"
-                        onClick={sendBackward}
-                        aria-label="Move element down one layer"
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip position="bottom" content="Move element to bottom layer">
-                      <EuiButtonIcon
-                        color="text"
-                        iconType="sortDown"
-                        onClick={sendToBack}
-                        aria-label="Move element to bottom layer"
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                </Fragment>
-              )}
+              {showLayerControls && this._renderLayoutControls()}
               <EuiFlexItem grow={false}>
                 <EuiToolTip position="bottom" content="Save as new element">
                   <EuiButtonIcon
@@ -302,7 +305,7 @@ export class SidebarHeader extends PureComponent<Props> {
                   />
                 </EuiToolTip>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>{contextMenu}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{this._renderContextMenu()}</EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
