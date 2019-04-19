@@ -79,7 +79,7 @@ export class ElementTypes extends Component {
             title={displayName}
             description={help}
             onClick={whenClicked}
-            className="canvasCard"
+            className={image ? 'canvasCard' : 'canvasCard canvasCard--hasIcon'}
           />
           {showControls && (
             <ElementControls
@@ -111,11 +111,11 @@ export class ElementTypes extends Component {
     const { elementToEdit } = this.state;
     return (
       <CustomElementModal
-        title="Edit your element"
+        title="Edit element"
         name={elementToEdit.displayName}
         description={elementToEdit.help}
         onSave={updateCustomElement(elementToEdit.id)}
-        onClose={this._hideEditModal}
+        onCancel={this._hideEditModal}
       />
     );
   };
