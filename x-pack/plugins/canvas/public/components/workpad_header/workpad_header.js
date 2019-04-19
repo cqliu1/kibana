@@ -27,7 +27,6 @@ export class WorkpadHeader extends React.PureComponent {
   static propTypes = {
     isWriteable: PropTypes.bool,
     toggleWriteable: PropTypes.func,
-    addElement: PropTypes.func.isRequired,
     showElementModal: PropTypes.bool,
     setShowElementModal: PropTypes.func,
   };
@@ -49,7 +48,7 @@ export class WorkpadHeader extends React.PureComponent {
   };
 
   elementAdd = () => {
-    const { addElement, setShowElementModal } = this.props;
+    const { setShowElementModal } = this.props;
 
     return (
       <EuiOverlayMask>
@@ -59,12 +58,7 @@ export class WorkpadHeader extends React.PureComponent {
           maxWidth="1000px"
           initialFocus=".canvasElements__filter"
         >
-          <ElementTypes
-            onClick={element => {
-              addElement(element);
-              setShowElementModal(false);
-            }}
-          />
+          <ElementTypes onClose={() => setShowElementModal(false)} />
           <EuiModalFooter>
             <EuiButton size="s" onClick={() => setShowElementModal(false)}>
               Close
