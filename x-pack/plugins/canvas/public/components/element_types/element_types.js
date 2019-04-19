@@ -114,6 +114,7 @@ export class ElementTypes extends Component {
         title="Edit element"
         name={elementToEdit.displayName}
         description={elementToEdit.help}
+        image={elementToEdit.image}
         onSave={updateCustomElement(elementToEdit.id)}
         onCancel={this._hideEditModal}
       />
