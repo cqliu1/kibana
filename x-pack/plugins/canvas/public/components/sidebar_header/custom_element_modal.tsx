@@ -34,7 +34,7 @@ import {
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
 import { encode } from '../../../common/lib/dataurl';
 
-const MAX_NAME_LENGTH = 20;
+const MAX_NAME_LENGTH = 40;
 const MAX_DESCRIPTION_LENGTH = 100;
 
 export interface Props {
