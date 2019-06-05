@@ -6,6 +6,8 @@
 
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import isEqual from 'react-fast-compare';
+import { compose, withPropsOnChange, pure } from 'recompose';
 import { findExpressionType } from '../../lib/find_expression_type';
 import { getId } from '../../lib/get_id';
 import { createAsset } from '../../state/actions/assets';
@@ -76,23 +78,12 @@ const mapDispatchToProps = (dispatch, { expressionIndex }) => ({
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { pageId, assets, element } = stateProps;
 
-  const { argType, nextArgType } = ownProps;
-  const {
-    updateContext,
-    setArgument,
-    addArgument,
-    deleteArgument,
-    onAssetAdd,
-    ...dispatchers
-  } = dispatchProps;
+  const { setArgument, addArgument, deleteArgument, onAssetAdd, ...dispatchers } = dispatchProps;
 
   return {
     ...stateProps,
     ...dispatchers,
     ...ownProps,
-    updateContext: updateContext(element),
-    expressionType: findExpressionType(argType),
-    nextExpressionType: nextArgType ? findExpressionType(nextArgType) : nextArgType,
     onValueChange: setArgument(element, pageId),
     onValueAdd: addArgument(element, pageId),
     onValueRemove: deleteArgument(element, pageId),
@@ -106,10 +97,30 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   };
 };
 
-export const FunctionForm = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-  mergeProps
+export const FunctionForm = compose(
+  connect(
+    mapStateToProps,
+    mapDispatchToProps,
+    mergeProps
+  ),
+  withPropsOnChange(
+    // rebuild handlers when element changes
+    (props, nextProps) => !isEqual(props.element, nextProps.element),
+    ({ updateContext, element }) => ({
+      updateContext: updateContext(element),
+    })
+  ),
+  withPropsOnChange(
+    // rebuild expression type data arg types change
+    (props, nextProps) =>
+      !isEqual(props.argType, nextProps.argType) ||
+      !isEqual(props.nextArgType, nextProps.nextArgType),
+    ({ argType, nextArgType }) => ({
+      expressionType: findExpressionType(argType),
+      nextExpressionType: nextArgType ? findExpressionType(nextArgType) : nextArgType,
+    })
+  ),
+  pure()
 )(Component);
 
 FunctionForm.propTypes = {
