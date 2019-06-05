@@ -6,6 +6,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import isEqual from 'react-fast-compare';
 import { Loading } from '../loading';
 
 export class FunctionFormContextPending extends Component {
@@ -21,10 +22,14 @@ export class FunctionFormContextPending extends Component {
   }
 
   shouldComponentUpdate(newProps) {
+    // avoid needless re-renders
+    if (isEqual(this.props, newProps)) {
+      return false;
+    }
+
     const oldContext = this.props.contextExpression;
     const newContext = newProps.contextExpression;
     const forceUpdate = newProps.requiresContext && oldContext !== newContext;
-    console.log({ oldContext, newContext, forceUpdate });
     if (!newProps.context || forceUpdate) {
       this.fetchContext(newProps, forceUpdate);
       return false;
