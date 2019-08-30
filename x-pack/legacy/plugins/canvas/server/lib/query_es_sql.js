@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import sqlstring from 'sqlstring';
 import { map, zipObject } from 'lodash';
 import { buildBoolArray } from './build_bool_array';
 import { sanitizeName } from './sanitize_name';
@@ -13,7 +14,7 @@ export const queryEsSQL = (elasticsearchClient, { count, query, filter, timezone
     path: '/_sql?format=json',
     method: 'POST',
     body: {
-      query,
+      query: sqlstring.escape(query),
       time_zone: timezone,
       fetch_size: count,
       client_id: 'canvas',

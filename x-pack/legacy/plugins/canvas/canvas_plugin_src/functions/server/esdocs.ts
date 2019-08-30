@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import squel from 'squel';
+import sqlstring from 'sqlstring';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
 // @ts-ignore untyped local
 import { queryEsSQL } from '../../../server/lib/query_es_sql';
@@ -19,6 +19,8 @@ interface Arguments {
   metaFields: string;
   count: number;
 }
+
+const quoteString = (str: string): string => `"${str}"`;
 
 export function esdocs(): ExpressionFunctionDefinition<'esdocs', Filter, Arguments, any> {
   const { help, args: argHelp } = getFunctionHelp().esdocs;
@@ -73,32 +75,28 @@ export function esdocs(): ExpressionFunctionDefinition<'esdocs', Filter, Argumen
         },
       ]);
 
-      let query = squel.select({
-        autoQuoteTableNames: true,
-        autoQuoteFieldNames: true,
-        autoQuoteAliasNames: true,
-        nameQuoteCharacter: '"',
-      });
+      const columns = fields
+        ? fields
+            .split(',')
+            .map((field: string) => quoteString(field.trim()))
+            .join(', ')
+        : '*';
 
-      if (index) {
-        query.from(index);
-      }
-
-      if (fields) {
-        const allFields = fields.split(',').map(field => field.trim());
-        allFields.forEach(field => (query = query.field(field)));
-      }
+      let query = `SELECT ${columns} FROM ${quoteString(index)}`;
 
       if (sort) {
         const [sortField, sortOrder] = sort.split(',').map(str => str.trim());
+
         if (sortField) {
-          query.order(`"${sortField}"`, sortOrder === 'asc');
+          query = query.concat(`ORDER BY ${sortField} ${sortOrder.toUpperCase()}`);
         }
       }
 
+      query = sqlstring.escape(query);
+
       return queryEsSQL(((context as any) as { elasticsearchClient: any }).elasticsearchClient, {
         count,
-        query: query.toString(),
+        query,
         filter: input.and,
       });
     },
