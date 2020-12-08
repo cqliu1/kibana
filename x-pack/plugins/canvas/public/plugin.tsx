@@ -6,6 +6,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { ChartsPluginSetup, ChartsPluginStart } from 'src/plugins/charts/public';
+import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import {
   CoreSetup,
   CoreStart,
@@ -53,6 +54,7 @@ export interface CanvasStartDeps {
   inspector: InspectorStart;
   uiActions: UiActionsStart;
   charts: ChartsPluginStart;
+  navigation: NavigationPublicPluginStart;
 }
 
 /**

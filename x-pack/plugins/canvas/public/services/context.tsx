@@ -24,6 +24,7 @@ const defaultContextValue = {
   notify: {},
   platform: {},
   navLink: {},
+  navigation: {},
 };
 
 const context = createContext<CanvasServices>(defaultContextValue as CanvasServices);
@@ -34,6 +35,7 @@ export const useEmbeddablesService = () => useServices().embeddables;
 export const useExpressionsService = () => useServices().expressions;
 export const useNotifyService = () => useServices().notify;
 export const useNavLinkService = () => useServices().navLink;
+export const useNavigationService = () => useServices().navigation;
 
 export const withServices = <Props extends WithServicesProps>(type: ComponentType<Props>) => {
   const EnhancedType: FC<Props> = (props) =>
@@ -52,6 +54,7 @@ export const ServicesProvider: FC<{
     notify: specifiedProviders.notify.getService(),
     platform: specifiedProviders.platform.getService(),
     navLink: specifiedProviders.navLink.getService(),
+    navigation: specifiedProviders.navigation.getService(),
   };
   return <context.Provider value={value}>{children}</context.Provider>;
 };

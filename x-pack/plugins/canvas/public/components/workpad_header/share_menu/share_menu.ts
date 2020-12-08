@@ -36,15 +36,25 @@ const getAbsoluteUrl = (path: string) => {
 };
 
 interface Props {
+  button: HTMLElement;
+  isOpen: boolean;
+  closePopover: () => void;
+}
+
+interface StateProps {
   workpad: CanvasWorkpad;
   pageCount: number;
 }
 
-export const ShareMenu = compose<ComponentProps, {}>(
+export const ShareMenu = compose<ComponentProps, Props>(
   connect(mapStateToProps),
   withServices,
   withProps(
-    ({ workpad, pageCount, services }: Props & WithServicesProps): ComponentProps => ({
+    ({
+      workpad,
+      pageCount,
+      services,
+    }: StateProps & WithServicesProps): Partial<ComponentProps> => ({
       getExportUrl: (type) => {
         if (type === 'pdf') {
           const pdfUrl = getPdfUrl(

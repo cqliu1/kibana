@@ -5,11 +5,11 @@
  */
 
 import React, { FunctionComponent, useState } from 'react';
+import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
-import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
+import { EuiButtonEmpty, EuiContextMenu, EuiIcon, EuiWrappingPopover } from '@elastic/eui';
 import { ComponentStrings } from '../../../../i18n/components';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
-import { Popover, ClosePopoverFn } from '../../popover';
 import { PDFPanel } from './pdf_panel';
 import { ShareWebsiteFlyout } from './flyout';
 
@@ -32,15 +32,24 @@ export interface Props {
   onExport: OnExportFn;
   /** Handler to retrive an export URL based on the type of export requested. */
   getExportUrl: GetExportUrlFn;
+  /** The button to trigger*/
+  button: HTMLElement;
 }
 
 /**
  * The Menu for Exporting a Workpad from Canvas.
  */
-export const ShareMenu: FunctionComponent<Props> = ({ onCopy, onExport, getExportUrl }) => {
+export const ShareMenu: FunctionComponent<Props> = ({
+  onCopy,
+  onExport,
+  getExportUrl,
+  button,
+  isOpen,
+  closePopover,
+}) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
-  const onClose = () => {
+  const closeFlyout = () => {
     setShowFlyout(false);
   };
 
@@ -97,18 +106,18 @@ export const ShareMenu: FunctionComponent<Props> = ({ onCopy, onExport, getExpor
     </EuiButtonEmpty>
   );
 
-  const flyout = showFlyout ? <ShareWebsiteFlyout onClose={onClose} /> : null;
+  const flyout = showFlyout ? <ShareWebsiteFlyout onClose={closeFlyout} /> : null;
 
   return (
     <div>
-      <Popover button={shareControl} panelPaddingSize="none" anchorPosition="downLeft">
-        {({ closePopover }: { closePopover: ClosePopoverFn }) => (
-          <EuiContextMenu
-            initialPanelId={0}
-            panels={flattenPanelTree(getPanelTree(closePopover))}
-          />
-        )}
-      </Popover>
+      <EuiWrappingPopover
+        button={button}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+        closePopover={closePopover}
+      >
+        <EuiContextMenu initialPanelId={0} panels={flattenPanelTree(getPanelTree(closePopover))} />
+      </EuiWrappingPopover>
       {flyout}
     </div>
   );
