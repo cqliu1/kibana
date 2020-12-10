@@ -9,7 +9,8 @@
 import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-
+import { EuiButton } from '@elastic/eui';
+import { VisualizeInput } from 'src/plugins/visualizations/public';
 import { useKibana } from '../../services/kibana_react';
 import { IndexPattern, SavedQuery, TimefilterContract } from '../../services/data';
 import {
@@ -42,11 +43,11 @@ import { showCloneModal } from './show_clone_modal';
 import { showOptionsPopover } from './show_options_popover';
 import { TopNavIds } from './top_nav_ids';
 import { ShowShareModal } from './show_share_modal';
-import { PanelToolbar } from './panel_toolbar';
 import { confirmDiscardOrKeepUnsavedChanges } from '../listing/confirm_overlays';
 import { OverlayRef } from '../../../../../core/public';
 import { getNewDashboardTitle, unsavedChangesBadge } from '../../dashboard_strings';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_panel_storage';
+import { PanelToolbar } from '../../../../presentation_util/public';
 import { DashboardContainer } from '..';
 
 export interface DashboardTopNavState {
@@ -143,11 +144,42 @@ export function DashboardTopNav({
 
   const createNew = useCallback(async () => {
     const type = 'visualization';
-    const factory = embeddable.getEmbeddableFactory(type);
+    // // falls back to new vis modal when Lens is not available
+    // let factory = embeddable.getEmbeddableFactory<EmbeddableInput>('lens');
+
+    // if (!factory) {
+    const factory = embeddable.getEmbeddableFactory<VisualizeInput>(type);
+
     if (!factory) {
       throw new EmbeddableFactoryNotFoundError(type);
     }
+
+    //   await factory.create({} as VisualizeInput, dashboardContainer);
+    // }
+
     await factory.create({} as EmbeddableInput, dashboardContainer);
+  }, [dashboardContainer, embeddable]);
+
+  const createNewMarkdown = useCallback(async () => {
+    const type = 'visualization';
+    const factory = embeddable.getEmbeddableFactory<VisualizeInput>(type);
+
+    if (!factory) {
+      throw new EmbeddableFactoryNotFoundError(type);
+    }
+
+    await factory.create({ visType: 'markdown' } as VisualizeInput, dashboardContainer);
+  }, [dashboardContainer, embeddable]);
+
+  const createNewInputControl = useCallback(async () => {
+    const type = 'visualization';
+    const factory = embeddable.getEmbeddableFactory(type);
+
+    if (!factory) {
+      throw new EmbeddableFactoryNotFoundError(type);
+    }
+
+    await factory.create({ visType: 'input_control_vis' } as VisualizeInput, dashboardContainer);
   }, [dashboardContainer, embeddable]);
 
   const clearAddPanel = useCallback(() => {
@@ -351,37 +383,6 @@ export function DashboardTopNav({
     dashboardStateManager,
   ]);
 
-  const runQuickSave = useCallback(async () => {
-    const currentTitle = dashboardStateManager.getTitle();
-    const currentDescription = dashboardStateManager.getDescription();
-    const currentTimeRestore = dashboardStateManager.getTimeRestore();
-
-    let currentTags: string[] = [];
-    if (savedObjectsTagging) {
-      const dashboard = dashboardStateManager.savedDashboard;
-      if (savedObjectsTagging.ui.hasTagDecoration(dashboard)) {
-        currentTags = dashboard.getTags();
-      }
-    }
-
-    setIsSaveInProgress(true);
-    save({}).then((response: SaveResult) => {
-      // If the save wasn't successful, put the original values back.
-      if (!(response as { id: string }).id) {
-        dashboardStateManager.setTitle(currentTitle);
-        dashboardStateManager.setDescription(currentDescription);
-        dashboardStateManager.setTimeRestore(currentTimeRestore);
-        if (savedObjectsTagging) {
-          dashboardStateManager.setTags(currentTags);
-        }
-      } else {
-        clearUnsavedChanges();
-      }
-      setIsSaveInProgress(false);
-      return response;
-    });
-  }, [save, savedObjectsTagging, dashboardStateManager, clearUnsavedChanges]);
-
   const runClone = useCallback(() => {
     const currentTitle = dashboardStateManager.getTitle();
     const onClone = async (
@@ -416,7 +417,6 @@ export function DashboardTopNav({
       [TopNavIds.EXIT_EDIT_MODE]: () => onChangeViewMode(ViewMode.VIEW),
       [TopNavIds.ENTER_EDIT_MODE]: () => onChangeViewMode(ViewMode.EDIT),
       [TopNavIds.SAVE]: runSave,
-      [TopNavIds.QUICK_SAVE]: runQuickSave,
       [TopNavIds.CLONE]: runClone,
       [TopNavIds.OPTIONS]: (anchorElement) => {
         showOptionsPopover({
@@ -454,7 +454,6 @@ export function DashboardTopNav({
     savedDashboard,
     runClone,
     runSave,
-    runQuickSave,
     share,
   ]);
 
@@ -533,11 +532,46 @@ export function DashboardTopNav({
   };
 
   const { TopNavMenu } = navigation.ui;
+
+  const createPanelButton = (
+    <EuiButton
+      fill
+      size="s"
+      iconType="plusInCircleFilled"
+      onClick={createNew}
+      data-test-subj="addVisualizationButton"
+    >
+      {i18n.translate('dashboard.panelToolbar.addPanelButtonLabel', {
+        defaultMessage: 'Create panel',
+      })}
+    </EuiButton>
+  );
+
+  const quickButtons = [
+    {
+      iconType: 'visText',
+      tooltip: 'Markdown',
+      action: createNewMarkdown,
+      ariaLabel: 'Create new markdown',
+    },
+    {
+      iconType: 'controlsHorizontal',
+      tooltip: 'Input control',
+      action: createNewInputControl,
+      ariaLabel: 'Create new input control',
+    },
+  ];
+
   return (
     <>
       <TopNavMenu {...getNavBarProps()} />
       {viewMode !== ViewMode.VIEW ? (
-        <PanelToolbar onAddPanelClick={createNew} onLibraryClick={addFromLibrary} />
+        <PanelToolbar
+          primaryActionButton={createPanelButton}
+          quickButtons={quickButtons}
+          container={dashboardContainer}
+          onLibraryClick={addFromLibrary}
+        />
       ) : null}
     </>
   );

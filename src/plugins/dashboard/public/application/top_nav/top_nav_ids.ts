@@ -11,6 +11,7 @@ export const TopNavIds = {
   OPTIONS: 'options',
   QUICK_SAVE: 'quickSave',
   SAVE: 'save',
+  SAVE_AS: 'saveAs',
   EXIT_EDIT_MODE: 'exitEditMode',
   ENTER_EDIT_MODE: 'enterEditMode',
   CLONE: 'clone',

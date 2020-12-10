@@ -41,6 +41,7 @@ interface TypeSelectionProps {
   outsideVisualizeApp?: boolean;
   stateTransfer?: EmbeddableStateTransfer;
   originatingApp?: string;
+  visType?: string;
 }
 
 interface TypeSelectionState {
@@ -82,6 +83,17 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
   public render() {
     if (!this.props.isOpen) {
       return null;
+    }
+
+    if (this.props.visType) {
+      const visType =
+        this.props.visTypesRegistry.get(this.props.visType) ||
+        this.props.visTypesRegistry.getAliases().find((alias) => this.props.visType === alias.name);
+
+      if (visType) {
+        this.onVisTypeSelected(visType);
+        return null;
+      }
     }
 
     const visNewVisDialogAriaLabel = i18n.translate(

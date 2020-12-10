@@ -15,7 +15,6 @@
   "references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../data/tsconfig.json" },
-    { "path": "../dashboard/tsconfig.json" },
     { "path": "../expressions/tsconfig.json" },
     { "path": "../ui_actions/tsconfig.json" },
     { "path": "../embeddable/tsconfig.json" },
@@ -25,5 +24,6 @@
     { "path": "../usage_collection/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },
     { "path": "../discover/tsconfig.json" },
+    { "path": "../presentation_util/tsconfig.json" },
   ]
 }
