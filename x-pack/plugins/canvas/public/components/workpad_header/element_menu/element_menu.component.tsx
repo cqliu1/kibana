@@ -6,20 +6,16 @@
  */
 
 import { sortBy } from 'lodash';
-import React, { Fragment, FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiButton,
-  EuiContextMenu,
-  EuiIcon,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui';
+import { EuiContextMenu, EuiIcon, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getId } from '../../../lib/get_id';
-import { Popover, ClosePopoverFn } from '../../popover';
+import { PrimaryActionPopover } from '../../../../../../../src/plugins/presentation_util/public';
+import { ClosePopoverFn } from '../../popover';
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib';
 import { ElementSpec } from '../../../../types';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
+import { getId } from '../../../lib/get_id';
 import { AssetManager } from '../../asset_manager';
 import { SavedElementsModal } from '../../saved_elements_modal';
 import { useLabsService } from '../../../services';
@@ -117,19 +113,15 @@ const categorizeElementsByType = (elements: ElementSpec[]): { [key: string]: Ele
   return categories;
 };
 
-export interface Props {
+interface Props {
   /**
    * Dictionary of elements from elements registry
    */
-  elements: { [key: string]: ElementSpec };
+  elementsRegistry: { [key: string]: ElementSpec };
   /**
    * Handler for adding a selected element to the workpad
    */
   addElement: (element: ElementSpec) => void;
-  /**
-   * Renders embeddable flyout
-   */
-  renderEmbedPanel: (onClose: () => void) => JSX.Element;
   /**
    * Crete new embeddable
    */
@@ -137,21 +129,17 @@ export interface Props {
 }
 
 export const ElementMenu: FunctionComponent<Props> = ({
-  elements,
+  elementsRegistry,
   addElement,
-  renderEmbedPanel,
   createNewEmbeddable,
 }) => {
   const labsService = useLabsService();
   const isByValueEnabled = labsService.isProjectEnabled('labs:canvas:byValueEmbeddable');
   const [isAssetModalVisible, setAssetModalVisible] = useState(false);
-  const [isEmbedPanelVisible, setEmbedPanelVisible] = useState(false);
   const [isSavedElementsModalVisible, setSavedElementsModalVisible] = useState(false);
 
   const hideAssetModal = () => setAssetModalVisible(false);
   const showAssetModal = () => setAssetModalVisible(true);
-  const hideEmbedPanel = () => setEmbedPanelVisible(false);
-  const showEmbedPanel = () => setEmbedPanelVisible(true);
   const hideSavedElementsModal = () => setSavedElementsModalVisible(false);
   const showSavedElementsModal = () => setSavedElementsModalVisible(true);
 
@@ -163,7 +151,7 @@ export const ElementMenu: FunctionComponent<Props> = ({
     progress: progressElements,
     shape: shapeElements,
     text: textElements,
-  } = categorizeElementsByType(Object.values(elements));
+  } = categorizeElementsByType(Object.values(elementsRegistry));
 
   const getPanelTree = (closePopover: ClosePopoverFn) => {
     const elementToMenuItem = (element: ElementSpec): EuiContextMenuPanelItemDescriptor => ({
@@ -222,61 +210,31 @@ export const ElementMenu: FunctionComponent<Props> = ({
             closePopover();
           },
         },
-        {
-          name: strings.getEmbedObjectMenuItemLabel(),
-          className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
-          icon: <EuiIcon type="logoKibana" size="m" />,
-          onClick: () => {
-            showEmbedPanel();
-            closePopover();
-          },
-        },
-        isByValueEnabled
-          ? {
-              name: 'Lens',
-              icon: <EuiIcon type="lensApp" size="m" />,
-              onClick: () => {
-                createNewEmbeddable();
-                closePopover();
-              },
-            }
-          : undefined,
       ],
     };
   };
 
-  const exportControl = (togglePopover: React.MouseEventHandler<any>) => (
-    <EuiButton
-      fill
-      iconType="plusInCircle"
-      size="s"
-      aria-label={strings.getElementMenuLabel()}
-      onClick={togglePopover}
-      className="canvasElementMenu__popoverButton"
-      data-test-subj="add-element-button"
-    >
-      {strings.getElementMenuButtonLabel()}
-    </EuiButton>
-  );
-
   return (
-    <Fragment>
-      <Popover button={exportControl} panelPaddingSize="none" anchorPosition="downLeft">
+    <>
+      <PrimaryActionPopover
+        panelPaddingSize="none"
+        label={strings.getElementMenuButtonLabel()}
+        iconType="plusInCircle"
+      >
         {({ closePopover }: { closePopover: ClosePopoverFn }) => (
           <EuiContextMenu
             initialPanelId={0}
             panels={flattenPanelTree(getPanelTree(closePopover))}
           />
         )}
-      </Popover>
+      </PrimaryActionPopover>
       {isAssetModalVisible ? <AssetManager onClose={hideAssetModal} /> : null}
-      {isEmbedPanelVisible ? renderEmbedPanel(hideEmbedPanel) : null}
       {isSavedElementsModalVisible ? <SavedElementsModal onClose={hideSavedElementsModal} /> : null}
-    </Fragment>
+    </>
   );
 };
 
 ElementMenu.propTypes = {
-  elements: PropTypes.object,
+  elementsRegistry: PropTypes.object,
   addElement: PropTypes.func.isRequired,
 };

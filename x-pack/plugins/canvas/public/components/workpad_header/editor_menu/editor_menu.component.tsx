@@ -1,34 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { FC } from 'react';
 import {
   EuiContextMenu,
   EuiContextMenuPanelItemDescriptor,
   EuiContextMenuItemIcon,
 } from '@elastic/eui';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { BaseVisType, VisGroups, VisTypeAlias } from '../../../../visualizations/public';
-import { SolutionToolbarPopover } from '../../../../presentation_util/public';
-import { EmbeddableFactoryDefinition, EmbeddableInput } from '../../services/embeddable';
-import { useKibana } from '../../services/kibana_react';
-import { DashboardAppServices } from '../../types';
-import { DashboardContainer } from '..';
-import { DashboardConstants } from '../../dashboard_constants';
-import { dashboardReplacePanelAction } from '../../dashboard_strings';
-
-interface Props {
-  /** Dashboard container */
-  dashboardContainer: DashboardContainer;
-  /** Handler for creating new visualization of a specified type */
-  createNewVisType: (visType: BaseVisType | VisTypeAlias) => () => void;
-}
+import { EmbeddableFactoryDefinition } from '../../../../../../../src/plugins/embeddable/public';
+import {
+  BaseVisType,
+  VisGroups,
+  VisTypeAlias,
+} from '../../../../../../../src/plugins/visualizations/public';
+import { SolutionToolbarPopover } from '../../../../../../../src/plugins/presentation_util/public';
 
 interface FactoryGroup {
   id: string;
@@ -38,57 +28,28 @@ interface FactoryGroup {
   factories: EmbeddableFactoryDefinition[];
 }
 
-export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
-  const { core, embeddable, visualizations, usageCollection, uiSettings } =
-    useKibana<DashboardAppServices>().services;
+interface Props {
+  factories: EmbeddableFactoryDefinition[];
+  isDarkThemeEnabled: boolean;
+  visTypeAliases: VisTypeAlias[];
+  createNewAggsBasedVis: (visType?: BaseVisType) => () => void;
+  createNewVisType: (visType?: BaseVisType | VisTypeAlias) => () => void;
+  createNewEmbeddable: (factory: EmbeddableFactoryDefinition) => () => void;
+  getVisTypesByGroup: (group: VisGroups) => BaseVisType[];
+}
 
-  const IS_DARK_THEME = uiSettings.get('theme:darkMode');
-
-  const trackUiMetric = usageCollection?.reportUiCounter.bind(
-    usageCollection,
-    DashboardConstants.DASHBOARD_ID
-  );
-
-  const createNewAggsBasedVis = useCallback(
-    (visType?: BaseVisType) => () =>
-      visualizations.showNewVisModal({
-        originatingApp: DashboardConstants.DASHBOARDS_ID,
-        outsideVisualizeApp: true,
-        showAggsSelection: true,
-        selectedVisType: visType,
-      }),
-    [visualizations]
-  );
-
-  const getVisTypesByGroup = (group: VisGroups) =>
-    visualizations
-      .getByGroup(group)
-      .sort(({ name: a }: BaseVisType | VisTypeAlias, { name: b }: BaseVisType | VisTypeAlias) => {
-        if (a < b) {
-          return -1;
-        }
-        if (a > b) {
-          return 1;
-        }
-        return 0;
-      })
-      .filter(({ hidden }: BaseVisType) => !hidden);
-
+export const EditorMenu: FC<Props> = ({
+  factories,
+  isDarkThemeEnabled,
+  visTypeAliases,
+  createNewAggsBasedVis,
+  createNewVisType,
+  createNewEmbeddable,
+  getVisTypesByGroup,
+}: Props) => {
   const promotedVisTypes = getVisTypesByGroup(VisGroups.PROMOTED);
   const aggsBasedVisTypes = getVisTypesByGroup(VisGroups.AGGBASED);
   const toolVisTypes = getVisTypesByGroup(VisGroups.TOOLS);
-  const visTypeAliases = visualizations
-    .getAliases()
-    .sort(({ promotion: a = false }: VisTypeAlias, { promotion: b = false }: VisTypeAlias) =>
-      a === b ? 0 : a ? -1 : 1
-    );
-
-  const factories = embeddable
-    ? Array.from(embeddable.getEmbeddableFactories()).filter(
-        ({ type, isEditable, canCreateNew, isContainerType }) =>
-          isEditable() && !isContainerType && canCreateNew() && type !== 'visualization'
-      )
-    : [];
 
   const factoryGroupMap: Record<string, FactoryGroup> = {};
   const ungroupedFactories: EmbeddableFactoryDefinition[] = [];
@@ -106,10 +67,8 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
         } else {
           factoryGroupMap[group.id] = {
             id: group.id,
-            appName: group.getDisplayName ? group.getDisplayName({ embeddable }) : group.id,
-            icon: (group.getIconType
-              ? group.getIconType({ embeddable })
-              : 'empty') as EuiContextMenuItemIcon,
+            appName: group.getDisplayName ? group.getDisplayName({}) : group.id,
+            icon: (group.getIconType ? group.getIconType({}) : 'empty') as EuiContextMenuItemIcon,
             factories: [factory],
             panelId: panelCount,
           };
@@ -159,27 +118,7 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
       name: factory.getDisplayName(),
       icon,
       toolTipContent,
-      onClick: async () => {
-        if (trackUiMetric) {
-          trackUiMetric(METRIC_TYPE.CLICK, factory.type);
-        }
-        let newEmbeddable;
-        if (factory.getExplicitInput) {
-          const explicitInput = await factory.getExplicitInput();
-          newEmbeddable = await dashboardContainer.addNewEmbeddable(factory.type, explicitInput);
-        } else {
-          newEmbeddable = await factory.create({} as EmbeddableInput, dashboardContainer);
-        }
-
-        if (newEmbeddable) {
-          core.notifications.toasts.addSuccess({
-            title: dashboardReplacePanelAction.getSuccessMessage(
-              `'${newEmbeddable.getInput().title}'` || ''
-            ),
-            'data-test-subj': 'addEmbeddableToDashboardSuccess',
-          });
-        }
-      },
+      onClick: createNewEmbeddable(factory),
       'data-test-subj': `createNew-${factory.type}`,
     };
   };
@@ -240,7 +179,7 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
           initialPanelId={0}
           panels={editorMenuPanels}
           className={`dshSolutionToolbar__editorContextMenu ${
-            IS_DARK_THEME
+            isDarkThemeEnabled
               ? 'dshSolutionToolbar__editorContextMenu--dark'
               : 'dshSolutionToolbar__editorContextMenu--light'
           }`}

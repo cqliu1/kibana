@@ -51,8 +51,6 @@ export const useIncomingEmbeddable = (pageId: string) => {
       } else {
         dispatch(addElement(pageId, { expression }));
       }
-
-      dispatch(selectToplevelNodes([embeddableId]));
     }
   }, [dispatch, pageId, incomingEmbeddable, isByValueEnabled]);
 };

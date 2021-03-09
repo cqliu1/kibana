@@ -8,6 +8,7 @@
 import { BehaviorSubject } from 'rxjs';
 import type { SharePluginSetup } from 'src/plugins/share/public';
 import { ChartsPluginSetup, ChartsPluginStart } from 'src/plugins/charts/public';
+import { VisualizationsStart } from 'src/plugins/visualizations/public';
 import { ReportingStart } from '../../reporting/public';
 import {
   CoreSetup,
@@ -62,6 +63,7 @@ export interface CanvasStartDeps {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   presentationUtil: PresentationUtilPluginStart;
+  visualizations: VisualizationsStart;
 }
 
 /**
@@ -76,8 +78,7 @@ export type CanvasStart = void;
 
 /** @internal */
 export class CanvasPlugin
-  implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps>
-{
+  implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps> {
   private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private initContext: PluginInitializerContext;
 
