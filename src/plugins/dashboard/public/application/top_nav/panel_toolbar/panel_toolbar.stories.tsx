@@ -11,9 +11,18 @@ import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { PanelToolbar } from './panel_toolbar';
 
-storiesOf('components/PanelToolbar', module).add('default', () => (
-  <PanelToolbar
-    onAddPanelClick={action('onAddPanelClick')}
-    onLibraryClick={action('onLibraryClick')}
-  />
-));
+storiesOf('components/PanelToolbar', module)
+  .add('default', () => (
+    <PanelToolbar
+      onAddPanelClick={action('onAddPanelClick')}
+      onLibraryClick={action('onLibraryClick')}
+    />
+  ))
+  .add('with children', () => (
+    <PanelToolbar
+      onAddPanelClick={action('onAddPanelClick')}
+      onLibraryClick={action('onLibraryClick')}
+    >
+      {<button>Extra Button</button>}
+    </PanelToolbar>
+  ));

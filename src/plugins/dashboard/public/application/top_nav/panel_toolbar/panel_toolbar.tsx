@@ -7,7 +7,7 @@
  */
 
 import './panel_toolbar.scss';
-import React, { FC } from 'react';
+import React, { FC, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -16,10 +16,17 @@ interface Props {
   onAddPanelClick: () => void;
   /** The click handler for the Library button for adding existing visualizations/embeddables */
   onLibraryClick: () => void;
+  /** Additional content for toolbar */
+  children?: ReactNode;
 }
 
-export const PanelToolbar: FC<Props> = ({ onAddPanelClick, onLibraryClick }) => (
-  <EuiFlexGroup className="panelToolbar" id="kbnDashboard__panelToolbar" gutterSize="s">
+export const PanelToolbar: FC<Props> = ({ onAddPanelClick, onLibraryClick, children }) => (
+  <EuiFlexGroup
+    className="panelToolbar"
+    id="kbnDashboard__panelToolbar"
+    gutterSize="s"
+    justifyContent="flexStart"
+  >
     <EuiFlexItem grow={false}>
       <EuiButton
         fill
@@ -33,6 +40,7 @@ export const PanelToolbar: FC<Props> = ({ onAddPanelClick, onLibraryClick }) => 
         })}
       </EuiButton>
     </EuiFlexItem>
+    <EuiFlexItem grow={false}>{children}</EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiButton
         size="s"

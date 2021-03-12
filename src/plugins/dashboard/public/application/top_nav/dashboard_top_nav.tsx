@@ -11,15 +11,19 @@ import angular from 'angular';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import UseUnmount from 'react-use/lib/useUnmount';
+import { EuiContextMenu, EuiPopover, EuiButton } from '@elastic/eui';
 import { VisualizeInput } from '../../../../visualizations/public';
 import {
   AddFromLibraryButton,
   PrimaryActionButton,
   QuickButtonGroup,
+  SolutionToolbar,
+  SolutionToolbarPopover,
 } from '../../../../presentation_util/public';
 import { useKibana } from '../../services/kibana_react';
 import { IndexPattern, SavedQuery, TimefilterContract } from '../../services/data';
 import {
+  EmbeddableFactoryDefinition,
   EmbeddableFactoryNotFoundError,
   EmbeddableInput,
   isErrorEmbeddable,
@@ -54,7 +58,6 @@ import { confirmDiscardOrKeepUnsavedChanges } from '../listing/confirm_overlays'
 import { OverlayRef } from '../../../../../core/public';
 import { getNewDashboardTitle, unsavedChangesBadge } from '../../dashboard_strings';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_panel_storage';
-import { SolutionToolbar } from '../../../../presentation_util/public';
 import { DashboardContainer } from '..';
 
 export interface DashboardTopNavState {
@@ -110,6 +113,38 @@ export function DashboardTopNav({
 
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
+  const [isEditorMenuOpen, setEditorMenuOpen] = useState(false);
+  const openEditorMenu = () => setEditorMenuOpen(true);
+  const closeEditorMenu = () => setEditorMenuOpen(false);
+
+  const factories = embeddable
+    ? Array.from(embeddable.getEmbeddableFactories()).filter(
+        ({ isEditable, canCreateNew, isContainerType }) =>
+          isEditable() && !isContainerType && canCreateNew()
+      )
+    : [];
+
+  const editorMenuPanels = [
+    {
+      id: 0,
+      items: factories.map((factory: EmbeddableFactoryDefinition) => {
+        const onClick = async () => {
+          if (factory.getExplicitInput) {
+            const explicitInput = await factory.getExplicitInput();
+            await dashboardContainer.addNewEmbeddable(factory.type, explicitInput);
+          } else {
+            await factory.create({} as EmbeddableInput, dashboardContainer);
+          }
+        };
+
+        return {
+          name: factory.getDisplayName(),
+          icon: 'empty',
+          onClick,
+        };
+      }),
+    },
+  ];
 
   useEffect(() => {
     const visibleSubscription = chrome.getIsVisible$().subscribe((chromeIsVisible) => {
@@ -152,16 +187,14 @@ export function DashboardTopNav({
     uiSettings,
   ]);
 
-  const createNew = useCallback(async () => {
-    const type = 'visualization';
-    const factory = embeddable.getEmbeddableFactory(type);
-
-    if (!factory) {
-      throw new EmbeddableFactoryNotFoundError(type);
-    }
-
-    await factory.create({} as EmbeddableInput, dashboardContainer);
-  }, [dashboardContainer, embeddable]);
+  // const createNew = useCallback(async () => {
+  //   const type = 'visualization';
+  //   const factory = embeddable.getEmbeddableFactory(type);
+  //   if (!factory) {
+  //     throw new EmbeddableFactoryNotFoundError(type);
+  //   }
+  //   await factory.create({} as EmbeddableInput, dashboardContainer);
+  // }, [dashboardContainer, embeddable]);
 
   const createNewVisType = useCallback(
     (newVisType: string) => async () => {
@@ -565,6 +598,20 @@ export function DashboardTopNav({
 
   const isUnifiedToolbarEnabled = experiments.getExperiment('presentation:unifiedToolbar').status
     .isEnabled;
+  const editorMenuButton = (
+    <EuiButton
+      color="text"
+      iconType="visualizeApp"
+      size="s"
+      className="panelToolbarButton"
+      onClick={openEditorMenu}
+      data-test-subj="dashboardEditorMenuButton"
+    >
+      {i18n.translate('dashboard.panelToolbar.editorMenuButtonLabel', {
+        defaultMessage: 'All editors',
+      })}
+    </EuiButton>
+  );
 
   const { TopNavMenu } = navigation.ui;
 
@@ -599,7 +646,7 @@ export function DashboardTopNav({
                   label={i18n.translate('dashboard.solutionToolbar.addPanelButtonLabel', {
                     defaultMessage: 'Create panel',
                   })}
-                  onClick={createNew}
+                  onClick={createNewVisType('lens')}
                   iconType="plusInCircleFilled"
                   data-test-subj="dashboardAddNewPanelButton"
                 />
@@ -611,13 +658,34 @@ export function DashboardTopNav({
                   data-test-subj="dashboardAddPanelButton"
                 />
               ),
+              extraButtons: factories.length
+                ? [
+                    <SolutionToolbarPopover
+                      ownFocus
+                      label={i18n.translate('dashboard.panelToolbar.editorMenuButtonLabel', {
+                        defaultMessage: 'All editors',
+                      })}
+                      iconType="visualizeApp"
+                      panelPaddingSize="none"
+                    >
+                      <EuiContextMenu initialPanelId={0} panels={editorMenuPanels} />
+                    </SolutionToolbarPopover>,
+                  ]
+                : undefined,
             }}
           </SolutionToolbar>
         ) : (
-          <PanelToolbar
-            onAddPanelClick={createNewVisType('lens')}
-            onLibraryClick={addFromLibrary}
-          />
+          <PanelToolbar onAddPanelClick={createNewVisType('lens')} onLibraryClick={addFromLibrary}>
+            <EuiPopover
+              isOpen={isEditorMenuOpen}
+              ownFocus
+              button={editorMenuButton}
+              panelPaddingSize="none"
+              closePopover={closeEditorMenu}
+            >
+              <EuiContextMenu initialPanelId={0} panels={editorMenuPanels} />
+            </EuiPopover>
+          </PanelToolbar>
         )
       ) : null}
     </>
