@@ -114,7 +114,7 @@ export function DashboardTopNav({
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
   const [isEditorMenuOpen, setEditorMenuOpen] = useState(false);
-  const openEditorMenu = () => setEditorMenuOpen(true);
+  const toggleEditorMenu = () => setEditorMenuOpen(!isEditorMenuOpen);
   const closeEditorMenu = () => setEditorMenuOpen(false);
 
   const factories = embeddable
@@ -186,15 +186,6 @@ export function DashboardTopNav({
     core.overlays,
     uiSettings,
   ]);
-
-  // const createNew = useCallback(async () => {
-  //   const type = 'visualization';
-  //   const factory = embeddable.getEmbeddableFactory(type);
-  //   if (!factory) {
-  //     throw new EmbeddableFactoryNotFoundError(type);
-  //   }
-  //   await factory.create({} as EmbeddableInput, dashboardContainer);
-  // }, [dashboardContainer, embeddable]);
 
   const createNewVisType = useCallback(
     (newVisType: string) => async () => {
@@ -598,13 +589,14 @@ export function DashboardTopNav({
 
   const isUnifiedToolbarEnabled = experiments.getExperiment('presentation:unifiedToolbar').status
     .isEnabled;
+
   const editorMenuButton = (
     <EuiButton
       color="text"
       iconType="visualizeApp"
       size="s"
       className="panelToolbarButton"
-      onClick={openEditorMenu}
+      onClick={toggleEditorMenu}
       data-test-subj="dashboardEditorMenuButton"
     >
       {i18n.translate('dashboard.panelToolbar.editorMenuButtonLabel', {
