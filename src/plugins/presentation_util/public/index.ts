@@ -20,6 +20,17 @@ export {
   SaveModalDashboardProps,
 } from './components';
 
+export {
+  AddFromLibraryButton,
+  PrimaryActionButton,
+  PrimaryActionPopover,
+  QuickButton,
+  QuickButtonGroup,
+  SolutionToolbar,
+  SolutionToolbarButton,
+  SolutionToolbarPopover,
+} from './components/solution_toolbar';
+
 export function plugin() {
   return new PresentationUtilPlugin();
 }
