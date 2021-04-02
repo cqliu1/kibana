@@ -30,6 +30,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import { UrlForwardingStart } from '../../../../url_forwarding/public';
 import { DashboardPanelStorage } from '../lib';
+import { PresentationUtilPluginStart } from 'src/plugins/presentation_util/public';
 
 function makeDefaultServices(): DashboardAppServices {
   const core = coreMock.createStart();
@@ -57,6 +58,7 @@ function makeDefaultServices(): DashboardAppServices {
 
   return {
     savedObjects: savedObjectsPluginMock.createStartContract(),
+    experiments: {} as PresentationUtilPluginStart['experimentsService'],
     embeddable: embeddablePluginMock.createInstance().doStart(),
     dashboardCapabilities: {} as DashboardCapabilities,
     initializerContext: {} as PluginInitializerContext,

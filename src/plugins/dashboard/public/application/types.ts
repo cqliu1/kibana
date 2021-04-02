@@ -16,6 +16,7 @@ import {
   PluginInitializerContext,
 } from 'kibana/public';
 
+import { PresentationUtilPluginStart } from 'src/plugins/presentation_util/public';
 import { SharePluginStart } from '../services/share';
 import { EmbeddableStart } from '../services/embeddable';
 import { UsageCollectionSetup } from '../services/usage_collection';
@@ -83,4 +84,5 @@ export interface DashboardAppServices {
   savedObjectsClient: SavedObjectsClientContract;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
+  experiments: PresentationUtilPluginStart['experimentsService'];
 }

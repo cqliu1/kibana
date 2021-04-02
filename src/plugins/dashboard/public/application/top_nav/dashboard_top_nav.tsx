@@ -46,6 +46,7 @@ import {
 import { getTopNavConfig } from './get_top_nav_config';
 import { DashboardSaveModal } from './save_modal';
 import { showCloneModal } from './show_clone_modal';
+import { PanelToolbar } from './panel_toolbar';
 import { showOptionsPopover } from './show_options_popover';
 import { TopNavIds } from './top_nav_ids';
 import { ShowShareModal } from './show_share_modal';
@@ -97,6 +98,7 @@ export function DashboardTopNav({
     share,
     chrome,
     embeddable,
+    experiments,
     navigation,
     uiSettings,
     setHeaderActionMenu,
@@ -561,6 +563,9 @@ export function DashboardTopNav({
     };
   };
 
+  const isUnifiedToolbarEnabled = experiments.getExperiment('presentation:unifiedToolbar').status
+    .isEnabled;
+
   const { TopNavMenu } = navigation.ui;
 
   const quickButtons = [
@@ -586,27 +591,31 @@ export function DashboardTopNav({
     <>
       <TopNavMenu {...getNavBarProps()} />
       {viewMode !== ViewMode.VIEW ? (
-        <SolutionToolbar>
-          {{
-            primaryActionButton: (
-              <PrimaryActionButton
-                label={i18n.translate('dashboard.solutionToolbar.addPanelButtonLabel', {
-                  defaultMessage: 'Create panel',
-                })}
-                onClick={createNew}
-                iconType="plusInCircleFilled"
-                data-test-subj="dashboardAddNewPanelButton"
-              />
-            ),
-            quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
-            addFromLibraryButton: (
-              <AddFromLibraryButton
-                onClick={addFromLibrary}
-                data-test-subj="dashboardAddPanelButton"
-              />
-            ),
-          }}
-        </SolutionToolbar>
+        isUnifiedToolbarEnabled ? (
+          <SolutionToolbar>
+            {{
+              primaryActionButton: (
+                <PrimaryActionButton
+                  label={i18n.translate('dashboard.solutionToolbar.addPanelButtonLabel', {
+                    defaultMessage: 'Create panel',
+                  })}
+                  onClick={createNew}
+                  iconType="plusInCircleFilled"
+                  data-test-subj="dashboardAddNewPanelButton"
+                />
+              ),
+              quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
+              addFromLibraryButton: (
+                <AddFromLibraryButton
+                  onClick={addFromLibrary}
+                  data-test-subj="dashboardAddPanelButton"
+                />
+              ),
+            }}
+          </SolutionToolbar>
+        ) : (
+          <PanelToolbar onAddPanelClick={createNew} onLibraryClick={addFromLibrary} />
+        )
       ) : null}
     </>
   );
