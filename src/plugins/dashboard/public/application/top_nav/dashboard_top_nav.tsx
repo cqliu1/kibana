@@ -614,7 +614,10 @@ export function DashboardTopNav({
             }}
           </SolutionToolbar>
         ) : (
-          <PanelToolbar onAddPanelClick={createNew} onLibraryClick={addFromLibrary} />
+          <PanelToolbar
+            onAddPanelClick={createNewVisType('lens')}
+            onLibraryClick={addFromLibrary}
+          />
         )
       ) : null}
     </>
