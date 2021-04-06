@@ -84,7 +84,7 @@ export const pie: RendererFactory<Pie> = () => ({
     }
 
     handlers.onDestroy(destroy);
-    handlers.onResize(debounce(draw, 40, { maxWait: 40 })); // 1000 / 40 = 25fps
+    // handlers.onResize(debounce(draw, 40, { maxWait: 40 })); // 1000 / 40 = 25fps
 
     draw();
 

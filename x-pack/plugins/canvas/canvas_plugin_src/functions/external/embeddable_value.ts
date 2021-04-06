@@ -6,10 +6,7 @@
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { PaletteOutput } from 'src/plugins/charts/common';
-import { TimeRange } from 'src/plugins/data/public';
-import { EmbeddableInput as Input } from 'src/plugins/embeddable/public';
-import { Filter } from '@kbn/es-query';
+import { EmbeddableInput } from 'src/plugins/embeddable/public';
 import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
 import { ExpressionValueFilter, TimeRange as TimeRangeArg } from '../../../types';
 import { EmbeddableExpressionType, EmbeddableExpression } from '../../expression_types';
@@ -17,24 +14,12 @@ import { getFunctionHelp } from '../../../i18n';
 import { SavedObjectReference } from '../../../../../../src/core/types';
 
 interface Arguments {
-  id: string;
-  title: string | null;
-  type: string;
-  timerange: TimeRangeArg | null;
-  palette?: PaletteOutput;
-  hideTitle?: boolean;
+  input: string;
 }
 
 const defaultTimeRange = {
   from: 'now-15m',
   to: 'now',
-};
-
-export type EmbeddableInput = Input & {
-  id: string;
-  timeRange?: TimeRange;
-  filters: Filter[];
-  palette?: PaletteOutput;
 };
 
 type Return = EmbeddableExpression<EmbeddableInput>;
@@ -52,34 +37,10 @@ export function embeddable(): ExpressionFunctionDefinition<
     name: 'embeddable',
     help,
     args: {
-      id: {
+      value: {
         types: ['string'],
         required: false,
         help: argHelp.id,
-      },
-      type: {
-        types: ['string'],
-        required: true,
-        help: argHelp.id,
-      },
-      timerange: {
-        types: ['timerange'],
-        help: argHelp.timerange,
-        required: false,
-      },
-      title: {
-        types: ['string'],
-        help: argHelp.title,
-        required: false,
-      },
-      hideTitle: {
-        types: ['boolean'],
-        help: argHelp.hideTitle as string,
-      },
-      palette: {
-        types: ['palette'],
-        help: argHelp.palette!,
-        required: false,
       },
     },
     type: EmbeddableExpressionType,

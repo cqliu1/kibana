@@ -27,8 +27,6 @@ const embeddablesRegistry: {
   [key: string]: IEmbeddable | Promise<IEmbeddable>;
 } = {};
 
-let destroyFn: () => void;
-
 const encode = (input: EmbeddableInput) => btoa(JSON.stringify(input));
 const decode = (serializedInput: string) => JSON.parse(atob(serializedInput));
 
@@ -60,11 +58,11 @@ export const embeddableRendererFactory = (
     help: strings.getHelpDescription(),
     reuseDomNode: true,
     render: async (domNode, { input, embeddableType }, handlers) => {
+      console.log(handlers);
       const isByValueEnabled = plugins.presentationUtil.labsService.isProjectEnabled(
         'labs:canvas:byValueEmbeddable'
       );
 
-      const uniqueId = handlers.getElementId();
       const serializedInput = handlers.getInput();
 
       const embeddableInput =
@@ -72,7 +70,7 @@ export const embeddableRendererFactory = (
           ? { ...decode(serializedInput), ...input }
           : input;
 
-      if (!embeddablesRegistry[uniqueId]) {
+      if (!embeddablesRegistry[input.id]) {
         const factory = Array.from(plugins.embeddable.getEmbeddableFactories()).find(
           (embeddableFactory) => embeddableFactory.type === embeddableType
         ) as EmbeddableFactory<EmbeddableInput>;
@@ -85,16 +83,16 @@ export const embeddableRendererFactory = (
         const embeddablePromise = factory
           .createFromSavedObject(input.id, embeddableInput)
           .then((embeddable) => {
-            embeddablesRegistry[uniqueId] = embeddable;
+            embeddablesRegistry[input.id] = embeddable;
             return embeddable;
           });
-        embeddablesRegistry[uniqueId] = embeddablePromise;
+        embeddablesRegistry[input.id] = embeddablePromise;
 
         const embeddableObject = await (async () => embeddablePromise)();
 
         const palettes = await plugins.charts.palettes.getPalettes();
 
-        embeddablesRegistry[uniqueId] = embeddableObject;
+        embeddablesRegistry[input.id] = embeddableObject;
         ReactDOM.unmountComponentAtNode(domNode);
 
         const subscription = embeddableObject.getInput$().subscribe(function (updatedInput) {
@@ -116,25 +114,27 @@ export const embeddableRendererFactory = (
 
         ReactDOM.render(renderEmbeddable(embeddableObject), domNode, () => handlers.done());
 
-        destroyFn = () => {
+        // handlers.onResize(() => {
+        //   ReactDOM.render(renderEmbeddable(embeddableObject, domNode), domNode, () =>
+        //     handlers.done()
+        //   );
+        // });
+
+        handlers.onDestroy(() => {
           subscription.unsubscribe();
           handlers.onEmbeddableDestroyed();
 
-          delete embeddablesRegistry[uniqueId];
+          delete embeddablesRegistry[input.id];
 
           return ReactDOM.unmountComponentAtNode(domNode);
-        };
+        });
       } else {
-        const embeddable = embeddablesRegistry[uniqueId];
+        const embeddable = embeddablesRegistry[input.id];
 
         if ('updateInput' in embeddable) {
           embeddable.updateInput(input);
           embeddable.reload();
         }
-      }
-
-      if (destroyFn) {
-        handlers.onDestroy(destroyFn);
       }
     },
   });

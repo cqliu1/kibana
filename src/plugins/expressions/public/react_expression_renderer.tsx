@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import { Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
-import { EuiLoadingChart, EuiProgress } from '@elastic/eui';
+import { EuiLoadingChart, EuiProgress, EuiLoadingSpinner } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { IExpressionLoaderParams, ExpressionRenderError } from './types';
 import { ExpressionAstExpression, IInterpreterRenderHandlers } from '../common';
@@ -222,7 +222,19 @@ export const ReactExpressionRenderer = ({
 
   return (
     <div {...dataAttrs} className={classes}>
-      {state.isEmpty && <EuiLoadingChart mono size="l" />}
+      {state.isEmpty && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            marginTop: '-12px',
+            marginLeft: '-12px',
+          }}
+        >
+          <EuiLoadingSpinner size="l" />
+        </div>
+      )}
       {(state.isLoading || waitingForDebounceToComplete) && (
         <EuiProgress size="xs" color="accent" position="absolute" />
       )}

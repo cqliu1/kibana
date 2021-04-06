@@ -18,6 +18,7 @@ import {
 } from '../../layout_annotations';
 import { WorkpadShortcuts } from '../../workpad_shortcuts';
 import { interactiveWorkpadPagePropTypes } from '../prop_types';
+import { Element } from '../../element';
 import { InteractionBoundary } from './interaction_boundary';
 
 export class InteractiveWorkpadPage extends PureComponent {
@@ -127,7 +128,8 @@ export class InteractiveWorkpadPage extends PureComponent {
                   return [];
               }
             } else if (node.type !== 'group') {
-              return <ElementWrapper key={node.id} element={node} />;
+              const { height, width, transformMatrix } = node;
+              return <Element key={node.id} id={node.id} {...{ height, width, transformMatrix }} />;
             }
           })
           .filter((element) => !!element)}

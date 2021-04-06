@@ -23,7 +23,7 @@ export function getRootReducer(initialState) {
   return combineReducers({
     assets: assetsReducer,
     app: appReducer,
-    transient: reduceReducers(transientReducer, resolvedArgsReducer),
+    transient: reduceReducers(transientReducer /*resolvedArgsReducer*/),
     persistent: reduceReducers(
       historyReducer,
       combineReducers({
