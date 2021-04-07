@@ -23,6 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
+  const dashboardAddPanel = getService('dashboardAddPanel');
 
   const LAYER_NAME = 'World Countries';
   let mapCounter = 0;
@@ -33,7 +34,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     if (inViewMode) {
       await PageObjects.dashboard.switchToEditMode();
     }
-    await PageObjects.visualize.clickMapsApp();
+    await dashboardAddPanel.clickEditorMenuButton();
+    await dashboardAddPanel.clickVisType('maps');
     await PageObjects.maps.clickSaveAndReturnButton();
   }
 

@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import UseUnmount from 'react-use/lib/useUnmount';
+import { BaseVisType, VisTypeAlias } from 'src/plugins/visualizations/public';
 import {
   AddFromLibraryButton,
   PrimaryActionButton,
@@ -19,13 +21,7 @@ import {
 } from '../../../../presentation_util/public';
 import { useKibana } from '../../services/kibana_react';
 import { IndexPattern, SavedQuery, TimefilterContract } from '../../services/data';
-import {
-  EmbeddableFactoryNotFoundError,
-  EmbeddableInput,
-  isErrorEmbeddable,
-  openAddPanelFlyout,
-  ViewMode,
-} from '../../services/embeddable';
+import { isErrorEmbeddable, openAddPanelFlyout, ViewMode } from '../../services/embeddable';
 import {
   getSavedObjectFinder,
   SavedObjectSaveOpts,
@@ -55,6 +51,7 @@ import { DashboardConstants } from '../../dashboard_constants';
 import { getNewDashboardTitle, unsavedChangesBadge } from '../../dashboard_strings';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_panel_storage';
 import { DashboardContainer } from '..';
+import { EditorMenu } from './editor_menu';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;
@@ -104,12 +101,22 @@ export function DashboardTopNav({
     dashboardCapabilities,
     dashboardPanelStorage,
     allowByValueEmbeddables,
+    visualizations,
+    usageCollection,
   } = useKibana<DashboardAppServices>().services;
 
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
   const stateTransferService = embeddable.getStateTransfer();
+  const lensAlias = visualizations.getAliases().find(({ name }) => name === 'lens');
+  const markdownVisType = visualizations.get('markdown') as BaseVisType;
+  const inputControlsVisType = visualizations.get('input_control_vis') as BaseVisType;
+
+  const trackUiMetric = usageCollection?.reportUiCounter.bind(
+    usageCollection,
+    DashboardConstants.DASHBOARDS_ID
+  );
 
   useEffect(() => {
     const visibleSubscription = chrome.getIsVisible$().subscribe((chromeIsVisible) => {
@@ -152,27 +159,36 @@ export function DashboardTopNav({
     uiSettings,
   ]);
 
-  const createNew = useCallback(async () => {
-    const type = 'visualization';
-    const factory = embeddable.getEmbeddableFactory(type);
-
-    if (!factory) {
-      throw new EmbeddableFactoryNotFoundError(type);
-    }
-
-    await factory.create({} as EmbeddableInput, dashboardContainer);
-  }, [dashboardContainer, embeddable]);
-
   const createNewVisType = useCallback(
-    (newVisType: string) => async () => {
-      stateTransferService.navigateToEditor('visualize', {
-        path: `#/create?type=${encodeURIComponent(newVisType)}`,
+    (visType?: BaseVisType | VisTypeAlias) => async () => {
+      let path = '';
+      let appId = '';
+
+      if (visType) {
+        if (trackUiMetric) {
+          trackUiMetric(METRIC_TYPE.CLICK, visType.name);
+        }
+
+        if ('aliasPath' in visType) {
+          appId = visType.aliasApp;
+          path = visType.aliasPath;
+        } else {
+          appId = 'visualize';
+          path = `#/create?type=${encodeURIComponent(visType.name)}`;
+        }
+      } else {
+        appId = 'visualize';
+        path = '#/create?';
+      }
+
+      stateTransferService.navigateToEditor(appId, {
+        path,
         state: {
           originatingApp: DashboardConstants.DASHBOARDS_ID,
         },
       });
     },
-    [stateTransferService]
+    [trackUiMetric, stateTransferService]
   );
 
   const clearAddPanel = useCallback(() => {
@@ -569,7 +585,7 @@ export function DashboardTopNav({
       createType: i18n.translate('dashboard.solutionToolbar.markdownQuickButtonLabel', {
         defaultMessage: 'Markdown',
       }),
-      onClick: createNewVisType('markdown'),
+      onClick: createNewVisType(markdownVisType),
       'data-test-subj': 'dashboardMarkdownQuickButton',
     },
     {
@@ -577,7 +593,7 @@ export function DashboardTopNav({
       createType: i18n.translate('dashboard.solutionToolbar.inputControlsQuickButtonLabel', {
         defaultMessage: 'Input control',
       }),
-      onClick: createNewVisType('input_control_vis'),
+      onClick: createNewVisType(inputControlsVisType),
       'data-test-subj': 'dashboardInputControlsQuickButton',
     },
   ];
@@ -591,9 +607,9 @@ export function DashboardTopNav({
             primaryActionButton: (
               <PrimaryActionButton
                 label={i18n.translate('dashboard.solutionToolbar.addPanelButtonLabel', {
-                  defaultMessage: 'Create panel',
+                  defaultMessage: 'Create chart',
                 })}
-                onClick={createNew}
+                onClick={createNewVisType(lensAlias)}
                 iconType="plusInCircleFilled"
                 data-test-subj="dashboardAddNewPanelButton"
               />
@@ -605,6 +621,12 @@ export function DashboardTopNav({
                 data-test-subj="dashboardAddPanelButton"
               />
             ),
+            extraButtons: [
+              <EditorMenu
+                createNewVisType={createNewVisType}
+                dashboardContainer={dashboardContainer}
+              />,
+            ],
           }}
         </SolutionToolbar>
       ) : null}

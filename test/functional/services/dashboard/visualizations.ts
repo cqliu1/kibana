@@ -31,8 +31,8 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
       if (inViewMode) {
         await PageObjects.dashboard.switchToEditMode();
       }
-      await dashboardAddPanel.ensureAddPanelIsShowing();
-      await dashboardAddPanel.clickAddNewEmbeddableLink('visualization');
+      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.clickAddNewEmbeddableLink('metrics');
       await PageObjects.visualize.clickVisualBuilder();
       await PageObjects.visualize.saveVisualizationExpectSuccess(name);
     }
@@ -118,8 +118,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
       if (inViewMode) {
         await PageObjects.dashboard.switchToEditMode();
       }
-      await this.ensureNewVisualizationDialogIsShowing();
-      await PageObjects.visualize.clickMarkdownWidget();
+      await dashboardAddPanel.clickMarkdownQuickButton();
       await PageObjects.visEditor.setMarkdownTxt(markdown);
       await PageObjects.visEditor.clickGo();
       await PageObjects.visualize.saveVisualizationExpectSuccess(name, {
@@ -134,8 +133,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
       if (inViewMode) {
         await PageObjects.dashboard.switchToEditMode();
       }
-      await this.ensureNewVisualizationDialogIsShowing();
-      await PageObjects.visualize.clickAggBasedVisualizations();
+      await dashboardAddPanel.clickAggBasedVisualizations();
       await PageObjects.visualize.clickMetric();
       await find.clickByCssSelector('li.euiListGroupItem:nth-of-type(2)');
       await testSubjects.exists('visualizesaveAndReturnButton');
@@ -148,7 +146,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
       if (inViewMode) {
         await PageObjects.dashboard.switchToEditMode();
       }
-      await this.ensureNewVisualizationDialogIsShowing();
+      await dashboardAddPanel.clickAggBasedVisualizations();
       await PageObjects.visualize.clickMarkdownWidget();
       await PageObjects.visEditor.setMarkdownTxt(markdown);
       await PageObjects.visEditor.clickGo();

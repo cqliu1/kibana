@@ -29,6 +29,7 @@ export interface ShowNewVisModalParams {
   originatingApp?: string;
   outsideVisualizeApp?: boolean;
   createByValue?: boolean;
+  showAggsSelection?: boolean;
 }
 
 /**
@@ -41,6 +42,7 @@ export function showNewVisModal({
   onClose,
   originatingApp,
   outsideVisualizeApp,
+  showAggsSelection,
 }: ShowNewVisModalParams = {}) {
   const container = document.createElement('div');
   let isClosed = false;
@@ -78,6 +80,7 @@ export function showNewVisModal({
           usageCollection={getUsageCollector()}
           application={getApplication()}
           docLinks={getDocLinks()}
+          showAggsSelection={showAggsSelection}
         />
       </Suspense>
     </I18nProvider>

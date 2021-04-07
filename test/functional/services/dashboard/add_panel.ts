@@ -30,15 +30,38 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.common.sleep(500);
     }
 
+    public async clickMarkdownQuickButton() {
+      log.debug('DashboardAddPanel.clickMarkdownQuickButton');
+      await testSubjects.click('dashboardMarkdownQuickButton');
+    }
+
+    public async clickInputControlsQuickButton() {
+      log.debug('DashboardAddPanel.clickInputControlsQuickButton');
+      await testSubjects.click('dashboardInputControlsQuickButton');
+    }
+
+    async clickEditorMenuButton() {
+      log.debug('DashboardAddPanel.clickEditorMenuButton');
+      await testSubjects.click('dashboardEditorMenuButton');
+    }
+
+    async clickAggBasedVisualizations() {
+      log.debug('DashboardAddPanel.clickEditorMenuAggBasedMenuItem');
+      await testSubjects.click('dashboardEditorAggBasedMenuItem');
+    }
+
     async clickVisType(visType: string) {
       log.debug('DashboardAddPanel.clickVisType');
       await testSubjects.click(`visType-${visType}`);
     }
 
+    async clickEmbeddableFactoryGroupButton(groupId: string) {
+      log.debug('DashboardAddPanel.clickEmbeddableFactoryGroupButton');
+      await testSubjects.click(`dashboardEditor-${groupId}Group`);
+    }
+
     async clickAddNewEmbeddableLink(type: string) {
-      await testSubjects.click('createNew');
       await testSubjects.click(`createNew-${type}`);
-      await testSubjects.missingOrFail(`createNew-${type}`);
     }
 
     async toggleFilterPopover() {

@@ -41,6 +41,7 @@ interface TypeSelectionProps {
   outsideVisualizeApp?: boolean;
   stateTransfer?: EmbeddableStateTransfer;
   originatingApp?: string;
+  showAggsSelection?: boolean;
 }
 
 interface TypeSelectionState {
@@ -70,7 +71,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
 
     this.state = {
       showSearchVisModal: false,
-      showGroups: true,
+      showGroups: !this.props.showAggsSelection,
     };
 
     this.trackUiMetric = this.props.usageCollection?.reportUiCounter.bind(
