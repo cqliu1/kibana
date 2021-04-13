@@ -9,6 +9,7 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { DashboardAddPanelProvider } from '../../services/dashboard/add_panel';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
@@ -16,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const dashboardVisualizations = getService('dashboardVisualizations');
+  const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('edit embeddable redirects', () => {
     before(async () => {
@@ -88,10 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const newTitle = 'test create panel originatingApp';
       await PageObjects.dashboard.loadSavedDashboard('few panels');
       await PageObjects.dashboard.switchToEditMode();
-      await testSubjects.exists('dashboardAddNewPanelButton');
-      await testSubjects.click('dashboardAddNewPanelButton');
-      await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
-      await PageObjects.visualize.clickMarkdownWidget();
+      await DashboardAddPanel.clickMarkdownQuickButton();
       await PageObjects.visualize.saveVisualizationExpectSuccess(newTitle, {
         saveAsNew: true,
         redirectToOrigin: false,
