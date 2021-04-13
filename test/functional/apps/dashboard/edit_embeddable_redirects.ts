@@ -9,12 +9,10 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { DashboardAddPanelProvider } from '../../services/dashboard/add_panel';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
   const esArchiver = getService('esArchiver');
-  const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -89,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const newTitle = 'test create panel originatingApp';
       await PageObjects.dashboard.loadSavedDashboard('few panels');
       await PageObjects.dashboard.switchToEditMode();
-      await DashboardAddPanel.clickMarkdownQuickButton();
+      await dashboardAddPanel.clickMarkdownQuickButton();
       await PageObjects.visualize.saveVisualizationExpectSuccess(newTitle, {
         saveAsNew: true,
         redirectToOrigin: false,
