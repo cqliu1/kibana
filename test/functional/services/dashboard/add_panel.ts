@@ -57,7 +57,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }: FtrPro
 
     async clickEmbeddableFactoryGroupButton(groupId: string) {
       log.debug('DashboardAddPanel.clickEmbeddableFactoryGroupButton');
-      await testSubjects.click(`dashboardEditor-${groupId}Group`);
+      await testSubjects.click(`dashboardEditorMenu-${groupId}Group`);
     }
 
     async clickAddNewEmbeddableLink(type: string) {

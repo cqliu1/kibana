@@ -67,7 +67,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.save('vis1', false, true);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await dashboardAddPanel.clickCreateNewLink();
-      await dashboardAddPanel.clickVisType('lens');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await PageObjects.lens.configureDimension({

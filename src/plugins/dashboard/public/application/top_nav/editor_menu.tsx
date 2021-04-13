@@ -167,7 +167,7 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
           name: appName,
           icon: icon as EuiContextMenuItemIcon,
           panel: panelId,
-          'data-test-subj': `dashboardEditor-${id}Group`,
+          'data-test-subj': `dashboardEditorMenu-${id}Group`,
         })),
         ...ungroupedFactories.map(getEmbeddableFactoryMenuItem),
         ...promotedVisTypes.map(getVisTypeMenuItem),
