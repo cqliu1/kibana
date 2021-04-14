@@ -19,7 +19,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const log = getService('log');
   const esArchiver = getService('esArchiver');
-  const dashboardVisualizations = getService('dashboardVisualizations');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -93,7 +92,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('editing a map by value', () => {
       before(async () => {
         await createNewDashboard();
-        await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
         await createAndAddMapByValue();
         await editByValueMap();
       });
@@ -112,7 +110,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('editing a map and adding to map library', () => {
       beforeEach(async () => {
         await createNewDashboard();
-        await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
         await createAndAddMapByValue();
       });
 

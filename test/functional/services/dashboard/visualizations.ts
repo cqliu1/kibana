@@ -146,8 +146,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
       if (inViewMode) {
         await PageObjects.dashboard.switchToEditMode();
       }
-      await dashboardAddPanel.clickAggBasedVisualizations();
-      await PageObjects.visualize.clickMarkdownWidget();
+      await dashboardAddPanel.clickMarkdownQuickButton();
       await PageObjects.visEditor.setMarkdownTxt(markdown);
       await PageObjects.visEditor.clickGo();
       await testSubjects.click('visualizesaveAndReturnButton');
