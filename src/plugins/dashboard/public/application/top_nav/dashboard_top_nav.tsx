@@ -7,6 +7,7 @@
  */
 
 import { METRIC_TYPE } from '@kbn/analytics';
+import { EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -601,6 +602,7 @@ export function DashboardTopNav({
   return (
     <>
       <TopNavMenu {...getNavBarProps()} />
+      <EuiHorizontalRule margin="none" />
       {viewMode !== ViewMode.VIEW ? (
         <SolutionToolbar>
           {{

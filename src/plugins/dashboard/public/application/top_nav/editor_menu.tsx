@@ -194,9 +194,10 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
     <SolutionToolbarPopover
       ownFocus
       label={i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
-        defaultMessage: 'All editors',
+        defaultMessage: 'More chart types',
       })}
-      iconType="visualizeApp"
+      iconType="arrowDown"
+      iconSide="right"
       panelPaddingSize="none"
       data-test-subj="dashboardEditorMenuButton"
     >

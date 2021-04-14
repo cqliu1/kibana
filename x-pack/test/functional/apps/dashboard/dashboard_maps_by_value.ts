@@ -84,8 +84,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('adding a map by value', () => {
       it('can add a map by value', async () => {
         await createNewDashboard();
-
-        await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
         await createAndAddMapByValue();
         const newPanelCount = await PageObjects.dashboard.getPanelCount();
         expect(newPanelCount).to.eql(1);
