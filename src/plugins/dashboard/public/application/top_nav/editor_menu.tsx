@@ -48,7 +48,7 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
   );
 
   const createNewAggsBasedVis = useCallback(
-    async () =>
+    () =>
       visualizations.showNewVisModal({
         originatingApp: DashboardConstants.DASHBOARDS_ID,
         outsideVisualizeApp: true,

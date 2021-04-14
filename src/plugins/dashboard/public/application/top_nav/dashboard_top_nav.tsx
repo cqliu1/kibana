@@ -161,7 +161,7 @@ export function DashboardTopNav({
   ]);
 
   const createNewVisType = useCallback(
-    (visType?: BaseVisType | VisTypeAlias) => async () => {
+    (visType?: BaseVisType | VisTypeAlias) => () => {
       let path = '';
       let appId = '';
 
