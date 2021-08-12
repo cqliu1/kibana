@@ -290,7 +290,6 @@ export const setInput = createThunk(
     const updatedElement = getNodeById(getState(), elementId, getSelectedPageIndex(state));
 
     if (doRender === true) {
-      console.log('dorender', updatedElement);
       dispatch(fetchRenderable(updatedElement));
     }
   }

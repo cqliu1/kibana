@@ -24,7 +24,7 @@ import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 const { embeddable: strings } = RendererStrings;
 
 const embeddablesRegistry: {
-  [key: string]: { embeddable: IEmbeddable | Promise<IEmbeddable>; destroyFn?: () => void };
+  [key: string]: { embeddable: IEmbeddable | Promise<IEmbeddable>; destroyFn: () => void };
 } = {};
 
 const encode = (input: EmbeddableInput) => btoa(JSON.stringify(input));
@@ -66,9 +66,7 @@ export const embeddableRendererFactory = (
       const serializedInput = handlers.getInput();
 
       const embeddableInput =
-        isByValueEnabled && serializedInput !== ''
-          ? { ...decode(serializedInput), ...input }
-          : input;
+        isByValueEnabled && serializedInput !== '' ? decode(serializedInput) : input;
 
       if (!embeddablesRegistry[uniqueId]) {
         const factory = Array.from(plugins.embeddable.getEmbeddableFactories()).find(
@@ -80,14 +78,10 @@ export const embeddableRendererFactory = (
           throw new EmbeddableFactoryNotFoundError(embeddableType);
         }
 
-        const embeddablePromise = await factory.createFromSavedObject(input.id, embeddableInput);
-        embeddablesRegistry[uniqueId] = { embeddable: embeddablePromise };
-
-        const embeddableObject = await (async () => embeddablePromise)();
+        const embeddableObject = await factory.createFromSavedObject(input.id, embeddableInput);
 
         const palettes = await plugins.charts.palettes.getPalettes();
 
-        embeddablesRegistry[uniqueId].embeddable = embeddableObject;
         ReactDOM.unmountComponentAtNode(domNode);
 
         const subscription = embeddableObject.getInput$().subscribe(function (updatedInput) {
@@ -100,9 +94,7 @@ export const embeddableRendererFactory = (
 
           if (isByValueEnabled) {
             handlers.setInput(encode(updatedInput));
-          }
-
-          if (updatedExpression) {
+          } else if (updatedExpression) {
             handlers.onEmbeddableInputChange(updatedExpression);
           }
         });
@@ -118,7 +110,7 @@ export const embeddableRendererFactory = (
           return ReactDOM.unmountComponentAtNode(domNode);
         };
 
-        embeddablesRegistry[uniqueId].destroyFn = destroyFn;
+        embeddablesRegistry[uniqueId] = { embeddable: embeddableObject, destroyFn };
 
         handlers.onDestroy(destroyFn);
       } else {
@@ -129,9 +121,7 @@ export const embeddableRendererFactory = (
           embeddable.reload();
         }
 
-        if (destroyFn) {
-          handlers.onDestroy(destroyFn);
-        }
+        handlers.onDestroy(destroyFn);
       }
     },
   });
