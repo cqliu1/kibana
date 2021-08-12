@@ -15,23 +15,11 @@ export const help: FunctionHelp<FunctionFactory<typeof embeddable>> = {
     defaultMessage: `Returns an embeddable`,
   }),
   args: {
-    id: i18n.translate('xpack.canvas.functions.embeddable.args.idHelpText', {
-      defaultMessage: `The ID of the embeddable saved object`,
+    input: i18n.translate('xpack.canvas.functions.embeddable.args.idHelpText', {
+      defaultMessage: `The base64 encoded embeddable input object`,
     }),
     type: i18n.translate('xpack.canvas.functions.embeddable.args.typeHelpText', {
       defaultMessage: `The embeddable type`,
-    }),
-    timerange: i18n.translate('xpack.canvas.functions.embeddable.args.timerangeHelpText', {
-      defaultMessage: `The timerange of data that should be included`,
-    }),
-    title: i18n.translate('xpack.canvas.functions.embeddable.args.titleHelpText', {
-      defaultMessage: `The title for the Lens visualization object`,
-    }),
-    hideTitle: i18n.translate('xpack.canvas.functions.embeddable.args.titleHelpText', {
-      defaultMessage: `The title for the Lens visualization object`,
-    }),
-    palette: i18n.translate('xpack.canvas.functions.embeddable.args.paletteHelpText', {
-      defaultMessage: `The palette used for the Lens visualization`,
     }),
   },
 };

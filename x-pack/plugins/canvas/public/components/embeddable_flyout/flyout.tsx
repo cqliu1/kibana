@@ -8,6 +8,7 @@
 import React, { useMemo, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useSelector, useDispatch } from 'react-redux';
+import { encode } from '../../lib/embeddable_dataurl';
 import { AddEmbeddableFlyout as Component, Props as ComponentProps } from './flyout.component';
 // @ts-expect-error untyped local
 import { addElement } from '../../state/actions/elements';
@@ -80,7 +81,8 @@ export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
       };
 
       if (isByValueEnabled) {
-        partialElement.expression = `embeddable id="${id}" type="${type}" | render`;
+        const input = encode({ id });
+        partialElement.expression = `embeddable input="${input}" type="${type}" | render`;
       } else if (allowedEmbeddables[type]) {
         partialElement.expression = allowedEmbeddables[type](id);
       }

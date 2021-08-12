@@ -30,11 +30,11 @@ const embeddablesRegistry: {
 const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
   const I18nContext = core.i18n.Context;
 
-  return (embeddableObject: IEmbeddable, domNode: HTMLElement) => {
+  return (embeddableObject: IEmbeddable) => {
     return (
       <div
         className={CANVAS_EMBEDDABLE_CLASSNAME}
-        style={{ width: domNode.offsetWidth, height: domNode.offsetHeight, cursor: 'auto' }}
+        style={{ width: '100%', height: '100%', cursor: 'auto' }}
       >
         <I18nContext>
           <plugins.embeddable.EmbeddablePanel embeddable={embeddableObject} />
@@ -71,19 +71,12 @@ export const embeddableRendererFactory = (
           throw new EmbeddableFactoryNotFoundError(embeddableType);
         }
 
-        const embeddablePromise = factory
-          .createFromSavedObject(input.id, input)
-          .then((embeddable) => {
-            embeddablesRegistry[uniqueId] = embeddable;
-            return embeddable;
-          });
-        embeddablesRegistry[uniqueId] = embeddablePromise;
+        const embeddableObject = await factory.createFromSavedObject(input.id, input);
 
-        const embeddableObject = await (async () => embeddablePromise)();
+        embeddablesRegistry[uniqueId] = embeddableObject;
 
         const palettes = await plugins.charts.palettes.getPalettes();
 
-        embeddablesRegistry[uniqueId] = embeddableObject;
         ReactDOM.unmountComponentAtNode(domNode);
 
         const subscription = embeddableObject.getInput$().subscribe(function (updatedInput) {
@@ -99,15 +92,7 @@ export const embeddableRendererFactory = (
           }
         });
 
-        ReactDOM.render(renderEmbeddable(embeddableObject, domNode), domNode, () =>
-          handlers.done()
-        );
-
-        handlers.onResize(() => {
-          ReactDOM.render(renderEmbeddable(embeddableObject, domNode), domNode, () =>
-            handlers.done()
-          );
-        });
+        ReactDOM.render(renderEmbeddable(embeddableObject), domNode, () => handlers.done());
 
         handlers.onDestroy(() => {
           subscription.unsubscribe();

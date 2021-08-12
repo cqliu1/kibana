@@ -6,23 +6,21 @@
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { EmbeddableInput as Input } from 'src/plugins/embeddable/public';
 import { PaletteOutput } from 'src/plugins/charts/common';
 import { TimeRange } from 'src/plugins/data/public';
-import { EmbeddableInput as Input } from 'src/plugins/embeddable/public';
 import { Filter } from '@kbn/es-query';
-import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
 import { ExpressionValueFilter, TimeRange as TimeRangeArg } from '../../../types';
 import { EmbeddableExpressionType, EmbeddableExpression } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
 import { SavedObjectReference } from '../../../../../../src/core/types';
 
+import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
+import { decode } from '../../../public/lib/embeddable_dataurl';
+
 interface Arguments {
-  id: string;
-  title: string | null;
+  input: string;
   type: string;
-  timerange: TimeRangeArg | null;
-  palette?: PaletteOutput;
-  hideTitle?: boolean;
 }
 
 const defaultTimeRange = {
@@ -37,6 +35,12 @@ export type EmbeddableInput = Input & {
   palette?: PaletteOutput;
 };
 
+const baseEmbeddableInput = {
+  timeRange: defaultTimeRange,
+  disableTriggers: true,
+  renderMode: 'noInteractivity',
+};
+
 type Return = EmbeddableExpression<EmbeddableInput>;
 
 export function embeddable(): ExpressionFunctionDefinition<
@@ -45,58 +49,37 @@ export function embeddable(): ExpressionFunctionDefinition<
   Arguments,
   Return
 > {
-  // TODO: write help text
   const { help, args: argHelp } = getFunctionHelp().embeddable;
 
   return {
     name: 'embeddable',
     help,
     args: {
-      id: {
+      input: {
         types: ['string'],
-        required: false,
-        help: argHelp.id,
+        required: true,
+        help: argHelp.input,
       },
       type: {
         types: ['string'],
         required: true,
-        help: argHelp.id,
-      },
-      timerange: {
-        types: ['timerange'],
-        help: argHelp.timerange,
-        required: false,
-      },
-      title: {
-        types: ['string'],
-        help: argHelp.title,
-        required: false,
-      },
-      hideTitle: {
-        types: ['boolean'],
-        help: argHelp.hideTitle as string,
-      },
-      palette: {
-        types: ['palette'],
-        help: argHelp.palette!,
-        required: false,
+        help: argHelp.type,
       },
     },
     type: EmbeddableExpressionType,
     fn: (input, args) => {
       const filters = input ? input.and : [];
 
+      const embeddableInput = decode(args.input) as EmbeddableInput;
+
       return {
         type: EmbeddableExpressionType,
         input: {
-          id: args.id,
-          filters: getQueryFilters(filters),
-          timeRange: args.timerange || defaultTimeRange,
-          title: args.title === null ? undefined : args.title,
-          hidePanelTitles: args.hideTitle,
-          disableTriggers: true,
-          palette: args.palette,
-          renderMode: 'noInteractivity',
+          ...baseEmbeddableInput,
+          ...embeddableInput,
+          filters: embeddableInput?.filters
+            ? embeddableInput.filters.concat(getQueryFilters(filters))
+            : getQueryFilters(filters),
         },
         generatedAt: Date.now(),
         embeddableType: args.type,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { toExpression as toExpressionString } from '@kbn/interpreter/common';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { EmbeddableInput } from '../../../functions/external/embeddable';
+import { encode } from '../../../../public/lib/embeddable_dataurl';
 
 export function toExpression(
   input: EmbeddableInput,
@@ -18,31 +18,9 @@ export function toExpression(
 
   expressionParts.push('embeddable');
 
-  expressionParts.push(`id="${input.id}"`);
+  expressionParts.push(`input="${encode(input)}"`);
 
   expressionParts.push(`type="${embeddableType}"`);
-
-  if (input.title !== undefined) {
-    expressionParts.push(`title="${input.title}"`);
-  }
-
-  if (input.timeRange) {
-    expressionParts.push(
-      `timerange={timerange from="${input.timeRange.from}" to="${input.timeRange.to}"}`
-    );
-  }
-
-  if (input.palette) {
-    expressionParts.push(
-      `palette={${toExpressionString(
-        palettes.get(input.palette.name).toExpression(input.palette.params)
-      )}}`
-    );
-  }
-
-  if (input.hidePanelTitles !== undefined) {
-    expressionParts.push(`hideTitle=${input.hidePanelTitles}`);
-  }
 
   return expressionParts.join(' ');
 }
