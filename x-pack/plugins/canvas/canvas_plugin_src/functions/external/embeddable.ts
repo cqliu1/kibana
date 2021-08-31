@@ -16,8 +16,7 @@ import {
 } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
 import { SavedObjectReference } from '../../../../../../src/core/types';
-
-import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
+import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import { decode } from '../../../public/lib/embeddable_dataurl';
 
 interface Arguments {
@@ -89,7 +88,6 @@ export function embeddable(): ExpressionFunctionDefinition<
       };
     },
 
-    // TODO: update this for migrations
     extract(state) {
       const refName = 'embeddable.id';
       const refType = 'embeddable.embeddableType';
@@ -109,7 +107,6 @@ export function embeddable(): ExpressionFunctionDefinition<
       };
     },
 
-    // TODO: update this for migrations
     inject(state, references) {
       const reference = references.find((ref) => ref.name === 'embeddable.id');
       if (reference) {
