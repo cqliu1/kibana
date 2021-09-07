@@ -7,5 +7,7 @@
 
 import { EmbeddableInput } from '../../canvas_plugin_src/expression_types';
 
-export const encode = (input: Partial<EmbeddableInput>) => btoa(JSON.stringify(input));
-export const decode = (serializedInput: string) => JSON.parse(atob(serializedInput));
+export const encode = (input: Partial<EmbeddableInput>) =>
+  Buffer.from(JSON.stringify(input)).toString('base64');
+export const decode = (serializedInput: string) =>
+  JSON.parse(Buffer.from(serializedInput, 'base64').toString());
