@@ -6,7 +6,7 @@
  */
 
 import { sortBy } from 'lodash';
-import React, { Fragment, FunctionComponent, useState } from 'react';
+import React, { Fragment, FunctionComponent, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiButton,
@@ -22,6 +22,7 @@ import { ElementSpec } from '../../../../types';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { AssetManager } from '../../asset_manager';
 import { SavedElementsModal } from '../../saved_elements_modal';
+import { useLabsService } from '../../../services';
 
 interface CategorizedElementLists {
   [key: string]: ElementSpec[];
@@ -129,13 +130,20 @@ export interface Props {
    * Renders embeddable flyout
    */
   renderEmbedPanel: (onClose: () => void) => JSX.Element;
+  /**
+   * Crete new embeddable
+   */
+  createNewEmbeddable: () => void;
 }
 
 export const ElementMenu: FunctionComponent<Props> = ({
   elements,
   addElement,
   renderEmbedPanel,
+  createNewEmbeddable,
 }) => {
+  const labsService = useLabsService();
+  const isByValueEnabled = labsService.isProjectEnabled('labs:canvas:byValueEmbeddable');
   const [isAssetModalVisible, setAssetModalVisible] = useState(false);
   const [isEmbedPanelVisible, setEmbedPanelVisible] = useState(false);
   const [isSavedElementsModalVisible, setSavedElementsModalVisible] = useState(false);
@@ -223,6 +231,16 @@ export const ElementMenu: FunctionComponent<Props> = ({
             closePopover();
           },
         },
+        isByValueEnabled
+          ? {
+              name: 'Lens',
+              icon: <EuiIcon type="lensApp" size="m" />,
+              onClick: () => {
+                createNewEmbeddable();
+                closePopover();
+              },
+            }
+          : undefined,
       ],
     };
   };

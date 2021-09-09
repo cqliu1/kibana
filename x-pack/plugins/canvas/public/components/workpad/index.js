@@ -9,6 +9,7 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { pure, compose, withState, withProps, getContext, withHandlers } from 'recompose';
 import useObservable from 'react-use/lib/useObservable';
+import { useIncomingEmbeddable } from '../hooks';
 import { transitionsRegistry } from '../../lib/transitions_registry';
 import { fetchAllRenderables } from '../../state/actions/elements';
 import { setZoomScale } from '../../state/actions/transient';
@@ -55,12 +56,15 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 };
 
 const AddContexts = (props) => {
-  const { isFullscreen, setFullscreen, undo, redo, autoplayInterval } =
-    useContext(WorkpadRoutingContext);
+  const { pages, selectedPageNumber } = props;
+  const { isFullscreen, setFullscreen, undo, redo, autoplayInterval } = useContext(
+    WorkpadRoutingContext
+  );
 
   const platformService = usePlatformService();
-
   const hasHeaderBanner = useObservable(platformService.hasHeaderBanner$());
+
+  const pageId = pages[selectedPageNumber - 1].id;
 
   const setFullscreenWithEffect = useCallback(
     (fullscreen) => {
@@ -76,6 +80,8 @@ const AddContexts = (props) => {
     },
     [setFullscreen, autoplayInterval]
   );
+
+  useIncomingEmbeddable(pageId);
 
   return (
     <WorkpadComponent
@@ -130,10 +136,7 @@ export const Workpad = compose(
     },
   }),
   withHandlers({
-    onTransitionEnd:
-      ({ setTransition }) =>
-      () =>
-        setTransition(null),
+    onTransitionEnd: ({ setTransition }) => () => setTransition(null),
     nextPage: (props) => () => {
       const pageNumber = Math.min(props.selectedPageNumber + 1, props.pages.length);
       props.onPageChange(pageNumber);

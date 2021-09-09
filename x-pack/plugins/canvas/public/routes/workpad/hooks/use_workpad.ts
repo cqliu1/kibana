@@ -28,15 +28,17 @@ export const useWorkpad = (
   useEffect(() => {
     (async () => {
       try {
-        const { assets, ...workpad } = await workpadService.get(workpadId);
-        dispatch(setAssets(assets));
-        dispatch(setWorkpad(workpad, { loadPages }));
-        dispatch(setZoomScale(1));
+        if (storedWorkpad.id !== workpadId) {
+          const { assets, ...workpad } = await workpadService.get(workpadId);
+          dispatch(setAssets(assets));
+          dispatch(setWorkpad(workpad, { loadPages }));
+          dispatch(setZoomScale(1));
+        }
       } catch (e) {
         setError(e);
       }
     })();
-  }, [workpadId, dispatch, setError, loadPages, workpadService]);
+  }, [workpadId, dispatch, setError, loadPages, workpadService, storedWorkpad.id]);
 
   return [storedWorkpad.id === workpadId ? storedWorkpad : undefined, error];
 };
