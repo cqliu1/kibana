@@ -17,7 +17,7 @@ import {
 import { getFunctionHelp } from '../../../i18n';
 import { SavedObjectReference } from '../../../../../../src/core/types';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
-import { decode } from '../../../public/lib/embeddable_dataurl';
+import { decode } from '../../../common/lib/embeddable_dataurl';
 
 interface Arguments {
   config: string;

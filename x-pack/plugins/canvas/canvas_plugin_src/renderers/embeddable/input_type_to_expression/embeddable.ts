@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { encode } from '../../../../public/lib/embeddable_dataurl';
+import { encode } from '../../../../common/lib/embeddable_dataurl';
 import { EmbeddableInput } from '../../../expression_types';
 
 export function toExpression(input: EmbeddableInput, embeddableType: string): string {

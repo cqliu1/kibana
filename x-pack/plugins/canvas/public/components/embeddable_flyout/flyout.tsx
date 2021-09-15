@@ -8,7 +8,7 @@
 import React, { useMemo, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { encode } from '../../lib/embeddable_dataurl';
+import { encode } from '../../../common/lib/embeddable_dataurl';
 import { AddEmbeddableFlyout as Component, Props as ComponentProps } from './flyout.component';
 // @ts-expect-error untyped local
 import { addElement } from '../../state/actions/elements';
