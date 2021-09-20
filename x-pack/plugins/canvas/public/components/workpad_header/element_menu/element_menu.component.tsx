@@ -6,7 +6,7 @@
  */
 
 import { sortBy } from 'lodash';
-import React, { Fragment, FunctionComponent, useState, useCallback } from 'react';
+import React, { Fragment, FunctionComponent, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiButton,

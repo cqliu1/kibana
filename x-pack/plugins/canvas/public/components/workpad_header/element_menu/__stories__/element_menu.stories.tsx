@@ -136,5 +136,6 @@ storiesOf('components/WorkpadHeader/ElementMenu', module).add('default', () => (
     elements={testElements}
     addElement={action('addElement')}
     renderEmbedPanel={mockRenderEmbedPanel}
+    createNewEmbeddable={action('createNewEmbeddable')}
   />
 ));
