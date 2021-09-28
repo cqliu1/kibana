@@ -127,9 +127,7 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
           isEditable() &&
           !isContainerType &&
           canCreateNew() &&
-          !['visualization', 'ml'].some((factoryType) => {
-            return type.includes(factoryType);
-          })
+          type !== 'visualization'
       )
     : [];
 

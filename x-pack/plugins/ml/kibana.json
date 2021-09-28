@@ -33,6 +33,7 @@
   "server": true,
   "ui": true,
   "requiredBundles": [
+    "canvas",
     "esUiShared",
     "kibanaUtils",
     "kibanaReact",
