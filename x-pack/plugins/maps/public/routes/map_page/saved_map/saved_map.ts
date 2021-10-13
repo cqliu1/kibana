@@ -57,6 +57,7 @@ export class SavedMap {
   private _mapEmbeddableInput?: MapEmbeddableInput;
   private readonly _onSaveCallback?: () => void;
   private _originatingApp?: string;
+  private _originatingPath?: string;
   private readonly _stateTransfer?: EmbeddableStateTransfer;
   private readonly _store: MapStore;
   private _tags: string[] = [];
@@ -68,6 +69,7 @@ export class SavedMap {
     onSaveCallback,
     originatingApp,
     stateTransfer,
+    originatingPath,
   }: {
     defaultLayers?: LayerDescriptor[];
     mapEmbeddableInput?: MapEmbeddableInput;
@@ -75,12 +77,14 @@ export class SavedMap {
     onSaveCallback?: () => void;
     originatingApp?: string;
     stateTransfer?: EmbeddableStateTransfer;
+    originatingPath?: string;
   }) {
     this._defaultLayers = defaultLayers;
     this._mapEmbeddableInput = mapEmbeddableInput;
     this._embeddableId = embeddableId;
     this._onSaveCallback = onSaveCallback;
     this._originatingApp = originatingApp;
+    this._originatingPath = originatingPath;
     this._stateTransfer = stateTransfer;
     this._store = createMapStore();
   }
@@ -358,6 +362,7 @@ export class SavedMap {
           type: MAP_SAVED_OBJECT_TYPE,
           input: updatedMapEmbeddableInput,
         },
+        path: this._originatingPath,
       });
       return;
     } else if (dashboardId) {
