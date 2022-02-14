@@ -20,7 +20,13 @@ import {
   ControlInput,
 } from './types';
 import { OptionsListEmbeddableFactory } from './control_types/options_list';
-import { ControlGroupContainerFactory, CONTROL_GROUP_TYPE, OPTIONS_LIST_CONTROL } from '.';
+import { RangeSliderEmbeddableFactory } from './control_types/range_slider';
+import {
+  ControlGroupContainerFactory,
+  CONTROL_GROUP_TYPE,
+  OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
+} from '.';
 
 export class ControlsPlugin
   implements
@@ -64,6 +70,15 @@ export class ControlsPlugin
     };
     embeddable.registerEmbeddableFactory(OPTIONS_LIST_CONTROL, optionsListFactory);
 
+    // Register range slider
+    const rangeSliderFactory = new RangeSliderEmbeddableFactory();
+    const editableRangeSliderFactory = rangeSliderFactory as IEditableControlFactory;
+    this.inlineEditors[RANGE_SLIDER_CONTROL] = {
+      controlEditorComponent: editableRangeSliderFactory.controlEditorComponent,
+      presaveTransformFunction: editableRangeSliderFactory.presaveTransformFunction,
+    };
+    embeddable.registerEmbeddableFactory(RANGE_SLIDER_CONTROL, rangeSliderFactory);
+
     return {};
   }
 
@@ -84,6 +99,18 @@ export class ControlsPlugin
     editableOptionsListFactory.presaveTransformFunction = optionsListPresaveTransform;
 
     if (optionsListFactory) controlsService.registerControlType(optionsListFactory);
+
+    // Register range slider
+    const rangeSliderFactory = embeddable.getEmbeddableFactory(RANGE_SLIDER_CONTROL);
+    const editableRangeSliderFactory = rangeSliderFactory as IEditableControlFactory;
+    const {
+      controlEditorComponent: rangeSliderControlEditor,
+      presaveTransformFunction: rangeSliderPresaveTransform,
+    } = this.inlineEditors[RANGE_SLIDER_CONTROL];
+    editableRangeSliderFactory.controlEditorComponent = rangeSliderControlEditor;
+    editableRangeSliderFactory.presaveTransformFunction = rangeSliderPresaveTransform;
+
+    if (rangeSliderFactory) controlsService.registerControlType(rangeSliderFactory);
 
     return {
       ContextProvider: pluginServices.getContextProvider(),

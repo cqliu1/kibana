@@ -18,7 +18,9 @@ import {
 import {
   ControlGroupContainerFactory,
   OptionsListEmbeddableInput,
+  RangeSliderEmbeddableInput,
   OPTIONS_LIST_CONTROL,
+  RANGE_SLIDER_CONTROL,
 } from '../';
 
 import { ViewMode } from '../../../embeddable/public';
@@ -147,6 +149,20 @@ export const ConfiguredControlGroupStory = () => (
           dataViewId: 'demoDataFlights',
           fieldName: 'Carrier',
         } as OptionsListEmbeddableInput,
+      },
+      rangeSlider1: {
+        type: RANGE_SLIDER_CONTROL,
+        order: 4,
+        width: 'auto',
+        explicitInput: {
+          id: 'rangeSlider1',
+          width: 'auto',
+          title: 'Average ticket price',
+          dataViewId: 'demoDataFlights',
+          fieldName: 'avgTicketPrice',
+          value: ['3', '13'],
+          step: 2,
+        } as RangeSliderEmbeddableInput,
       },
     }}
   />
