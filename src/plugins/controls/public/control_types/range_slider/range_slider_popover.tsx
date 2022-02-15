@@ -69,7 +69,6 @@ export const RangeSliderPopover: FC<Props> = ({
           max={max}
           min={min}
           onChange={onChange}
-          showLabels={showLabels}
           showRange={showRange}
           step={step}
           ticks={ticks}

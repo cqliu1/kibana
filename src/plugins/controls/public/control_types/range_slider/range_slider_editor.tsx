@@ -8,7 +8,7 @@
 
 import useMount from 'react-use/lib/useMount';
 import React, { useEffect, useState } from 'react';
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiFieldNumber, EuiSwitch } from '@elastic/eui';
 
 import { pluginServices } from '../../services';
 import { ControlEditorProps } from '../../types';
@@ -22,10 +22,12 @@ import {
 } from '../../../../presentation_util/public';
 
 interface RangeSliderEditorState {
-  singleSelect?: boolean;
-  dataViewListItems: DataViewListItem[];
   dataView?: DataView;
+  dataViewListItems: DataViewListItem[];
+  decimalPlaces: number;
   fieldName?: string;
+  showLabels: boolean;
+  step: number;
 }
 
 const FieldPicker = withSuspense(LazyFieldPicker, null);
@@ -43,8 +45,10 @@ export const RangeSliderEditor = ({
 
   const [state, setState] = useState<RangeSliderEditorState>({
     fieldName: initialInput?.fieldName,
-    singleSelect: initialInput?.singleSelect,
     dataViewListItems: [],
+    decimalPlaces: 0,
+    step: 1,
+    showLabels: true,
   });
 
   useMount(() => {
@@ -91,9 +95,7 @@ export const RangeSliderEditor = ({
       </EuiFormRow>
       <EuiFormRow fullWidth label={RangeSliderStrings.editor.getFieldTitle()}>
         <FieldPicker
-          filterPredicate={(field) =>
-            (field.aggregatable && field.type === 'string') || field.type === 'boolean'
-          }
+          filterPredicate={(field) => field.aggregatable && field.type === 'number'}
           selectedFieldName={fieldName}
           dataView={dataView}
           onSelectField={(field) => {
@@ -103,13 +105,23 @@ export const RangeSliderEditor = ({
           }}
         />
       </EuiFormRow>
-      <EuiFormRow fullWidth>
-        <EuiSwitch
-          label={RangeSliderStrings.editor.getAllowMultiselectTitle()}
-          checked={!state.singleSelect}
-          onChange={() => {
-            onChange({ singleSelect: !state.singleSelect });
-            setState((s) => ({ ...s, singleSelect: !s.singleSelect }));
+      <EuiFormRow fullWidth label={RangeSliderStrings.editor.getDecimalPlacesTitle()}>
+        <EuiFieldNumber
+          value={state.decimalPlaces}
+          onChange={(event) => {
+            const decimalPlaces = Number(event.target.value);
+            onChange({ decimalPlaces });
+            setState((s) => ({ ...s, decimalPlaces }));
+          }}
+        />
+      </EuiFormRow>
+      <EuiFormRow fullWidth label={RangeSliderStrings.editor.getStepTitle()}>
+        <EuiFieldNumber
+          value={state.step}
+          onChange={(event) => {
+            const step = Number(event.target.value);
+            onChange({ step });
+            setState((s) => ({ ...s, step }));
           }}
         />
       </EuiFormRow>

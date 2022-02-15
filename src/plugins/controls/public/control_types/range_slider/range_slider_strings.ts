@@ -36,9 +36,17 @@ export const RangeSliderStrings = {
       i18n.translate('controls.rangeSlider.editor.fieldTitle', {
         defaultMessage: 'Field',
       }),
-    getAllowMultiselectTitle: () =>
+    getDecimalPlacesTitle: () =>
       i18n.translate('controls.rangeSlider.editor.allowMultiselectTitle', {
-        defaultMessage: 'Allow multiple selections in dropdown',
+        defaultMessage: 'Decimal places',
+      }),
+    getStepTitle: () =>
+      i18n.translate('controls.rangeSlider.editor.allowMultiselectTitle', {
+        defaultMessage: 'Step size',
+      }),
+    getShowLabelTitle: () =>
+      i18n.translate('controls.rangeSlider.editor.allowMultiselectTitle', {
+        defaultMessage: 'Show label',
       }),
   },
   popover: {

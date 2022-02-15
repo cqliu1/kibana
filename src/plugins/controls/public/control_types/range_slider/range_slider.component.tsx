@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiFilterButton, EuiFilterGroup, EuiPopover } from '@elastic/eui';
+import { EuiFilterButton, EuiFilterGroup, EuiPopover, EuiDualRange } from '@elastic/eui';
 import React, { FC, useCallback, useState } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import { useReduxEmbeddableContext } from '../../../../presentation_util/public';
-import { ValidatedDualRange } from '../../../../kibana_react/public';
 import { useStateObservable } from '../../hooks/use_state_observable';
 import { ceilWithPrecision, floorWithPrecision } from './lib/round_with_precision';
 import { RangeSliderPopover } from './range_slider_popover';
@@ -41,7 +40,6 @@ export const RangeSliderComponent: FC<Props> = ({ typeaheadSubject, componentSta
     min = 0,
     max = 20,
     value,
-    showLabels,
     showRange,
     decimalPlaces = 0,
     id,
@@ -71,7 +69,7 @@ export const RangeSliderComponent: FC<Props> = ({ typeaheadSubject, componentSta
       onClick={() => setIsPopoverOpen((openState) => !openState)}
       isSelected={isPopoverOpen}
     >
-      <ValidatedDualRange value={selectedValue} showInput="inputWithPopover" fullWidth readOnly />
+      <EuiDualRange value={selectedValue} showInput="inputWithPopover" fullWidth readOnly />
     </EuiFilterButton>
   );
 
@@ -97,7 +95,6 @@ export const RangeSliderComponent: FC<Props> = ({ typeaheadSubject, componentSta
           min={roundedMin}
           onChange={onChangeComplete}
           max={roundedMax}
-          showLabels={showLabels}
           showRange={showRange}
           step={step}
         />

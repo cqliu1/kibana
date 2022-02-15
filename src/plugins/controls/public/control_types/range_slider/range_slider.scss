@@ -7,21 +7,6 @@
   height: 100%;
 }
 
-.rangeSlider__items {
-  @include euiScrollBar;
-
-  overflow-y: auto;
-  max-height: $euiSize * 30;
-  width: $euiSize * 25;
-  max-width: 100%;
-}
-
-.rangeSlider__actions {
-  padding: $euiSizeS;
-  border-bottom: $euiBorderThin;
-  border-color: darken($euiColorLightestShade, 2%);
-}
-
 .rangeSlider__popoverAnchorButton {
   .euiButtonContent {
     padding:0;
@@ -29,15 +14,6 @@
   .euiButtonEmpty__text {
     width:100%;
   }
-}
-
-.rangeSlider--filterGroupSingle {
-  box-shadow: none;
-  height: 100%;
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  border-top-right-radius: $euiBorderRadius - 1px;
-  border-bottom-right-radius: $euiBorderRadius - 1px;
 }
 
 .rangeSlider--filterGroup {
