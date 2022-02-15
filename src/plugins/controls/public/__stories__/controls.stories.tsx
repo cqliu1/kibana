@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { action } from '@storybook/addon-actions';
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiTextAlign } from '@elastic/eui';
 import React, { useEffect, useMemo, useState, useCallback, FC } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
@@ -33,6 +34,7 @@ import { pluginServices, registry } from '../services/storybook';
 import { replaceValueSuggestionMethod } from '../services/storybook/data';
 import { injectStorybookDataView } from '../services/storybook/data_views';
 import { populateStorybookControlFactories } from './storybook_control_factories';
+import { RangeSliderPopover } from '../control_types/range_slider/range_slider_popover';
 
 export default {
   title: 'Controls',
@@ -164,6 +166,24 @@ export const ConfiguredControlGroupStory = () => (
           step: 2,
         } as RangeSliderEmbeddableInput,
       },
+    }}
+  />
+);
+
+export const RangeSliderPopoverStory = () => (
+  <RangeSliderPopover
+    {...{
+      id: 'rangeSlider1',
+      width: 'auto',
+      title: 'Average ticket price',
+      dataViewId: 'demoDataFlights',
+      fieldName: 'avgTicketPrice',
+      value: ['3', '13'],
+      step: 2,
+      min: 0,
+      max: 20,
+      componentStateSubject: { loading: false, min: 0, max: 20 },
+      onChange: action('onChange'),
     }}
   />
 );

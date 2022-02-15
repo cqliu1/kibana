@@ -7,18 +7,7 @@
  */
 
 import React, { FC, useMemo, useState } from 'react';
-import {
-  EuiFilterSelectItem,
-  EuiPopoverTitle,
-  EuiFieldSearch,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  EuiFormRow,
-  EuiSpacer,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiDualRange, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import { ValidatedDualRange } from '../../../../kibana_react/public';
 
 import { RangeSliderEmbeddableInput, RangeValue } from './types';
@@ -29,6 +18,7 @@ import { useReduxEmbeddableContext } from '../../../../presentation_util/public'
 
 export interface Props {
   id: string;
+  title?: string;
   value: RangeValue;
   min: number;
   max: number;
@@ -36,10 +26,12 @@ export interface Props {
   step?: number;
   showLabels?: boolean;
   showRange?: boolean;
+  isLoading?: boolean;
 }
 
 export const RangeSliderPopover: FC<Props> = ({
   id,
+  title,
   min,
   max,
   step,
@@ -47,21 +39,44 @@ export const RangeSliderPopover: FC<Props> = ({
   showLabels,
   showRange,
   onChange,
+  isLoading,
 }) => {
-  // Redux embeddable container Context
-  const { useEmbeddableSelector } = useReduxEmbeddableContext<
-    RangeSliderEmbeddableInput,
-    typeof rangeSliderReducers
-  >();
+  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
-  const { title } = useEmbeddableSelector((state) => state);
   const ticks = [
     { value: min, label: min },
     { value: max, label: max },
   ];
 
+  const button = (
+    <EuiButtonEmpty
+      className="rangeSlider__popoverAnchorButton"
+      data-test-subj={`range-slider-control-${id}`}
+      onClick={() => setIsPopoverOpen((openState) => !openState)}
+      isLoading={isLoading}
+    >
+      <EuiDualRange
+        value={value}
+        showInput="inputWithPopover"
+        fullWidth
+        readOnly
+        onChange={() => {}}
+      />
+    </EuiButtonEmpty>
+  );
+
   return (
-    <>
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      className="rangeSlider__popoverOverride"
+      anchorClassName="rangeSlider__anchorOverride"
+      closePopover={() => setIsPopoverOpen(false)}
+      panelPaddingSize="none"
+      anchorPosition="downCenter"
+      ownFocus
+      repositionOnScroll
+    >
       <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>
       <div className="rangeSlider__actions">
         <ValidatedDualRange
@@ -78,6 +93,6 @@ export const RangeSliderPopover: FC<Props> = ({
           showTicks
         />
       </div>
-    </>
+    </EuiPopover>
   );
 };

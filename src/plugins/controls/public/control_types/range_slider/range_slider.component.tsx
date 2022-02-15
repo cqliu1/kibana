@@ -20,12 +20,12 @@ import { RangeSliderEmbeddableInput, RangeValue } from './types';
 import './range_slider.scss';
 
 interface Props {
-  typeaheadSubject: Subject<string>;
   componentStateSubject: BehaviorSubject<RangeSliderComponentState>;
 }
 // Availableoptions and loading state is controled by the embeddable, but is not considered embeddable input.
 export interface RangeSliderComponentState {
-  availableOptions?: string[];
+  min: number;
+  max: number;
   loading: boolean;
 }
 
@@ -36,20 +36,18 @@ export const RangeSliderComponent: FC<Props> = ({ typeaheadSubject, componentSta
     typeof rangeSliderReducers
   >();
   const {
-    min = 0,
-    max = 20,
     value,
     showRange,
     decimalPlaces = 0,
     id,
     step,
+    title,
   } = useEmbeddableSelector((state) => state);
 
-  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [selectedValue, setSelectedValue] = useState<RangeValue>(value);
 
   // useStateObservable to get component state from Embeddable
-  const { availableOptions } = useStateObservable<RangeSliderComponentState>(
+  const { loading, min, max } = useStateObservable<RangeSliderComponentState>(
     componentStateSubject,
     componentStateSubject.getValue()
   );
@@ -61,46 +59,20 @@ export const RangeSliderComponent: FC<Props> = ({ typeaheadSubject, componentSta
     [setSelectedValue]
   );
 
-  const button = (
-    <EuiButtonEmpty
-      className="rangeSlider__popoverAnchorButton"
-      data-test-subj={`range-slider-control-${id}`}
-      onClick={() => setIsPopoverOpen((openState) => !openState)}
-    >
-      <EuiDualRange
-        value={selectedValue}
-        showInput="inputWithPopover"
-        fullWidth
-        readOnly
-        onChange={() => {}}
-      />
-    </EuiButtonEmpty>
-  );
-
   const roundedMin = floorWithPrecision(min, decimalPlaces);
   const roundedMax = ceilWithPrecision(max, decimalPlaces);
 
   return (
-    <EuiPopover
-      button={button}
-      isOpen={isPopoverOpen}
-      className="rangeSlider__popoverOverride"
-      anchorClassName="rangeSlider__anchorOverride"
-      closePopover={() => setIsPopoverOpen(false)}
-      panelPaddingSize="none"
-      anchorPosition="downCenter"
-      ownFocus
-      repositionOnScroll
-    >
-      <RangeSliderPopover
-        id={id}
-        value={selectedValue}
-        min={roundedMin}
-        onChange={onChangeComplete}
-        max={roundedMax}
-        showRange={showRange}
-        step={step}
-      />
-    </EuiPopover>
+    <RangeSliderPopover
+      id={id}
+      title={title}
+      value={selectedValue}
+      min={roundedMin}
+      onChange={onChangeComplete}
+      max={roundedMax}
+      showRange={showRange}
+      step={step}
+      isLoading={loading}
+    />
   );
 };
