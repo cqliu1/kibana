@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiFilterButton, EuiFilterGroup, EuiPopover, EuiDualRange } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPopover, EuiDualRange } from '@elastic/eui';
 import React, { FC, useCallback, useState } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 
@@ -35,7 +35,6 @@ export const RangeSliderComponent: FC<Props> = ({ typeaheadSubject, componentSta
     RangeSliderEmbeddableInput,
     typeof rangeSliderReducers
   >();
-  const dispatch = useEmbeddableDispatch();
   const {
     min = 0,
     max = 20,
@@ -63,7 +62,7 @@ export const RangeSliderComponent: FC<Props> = ({ typeaheadSubject, componentSta
   );
 
   const button = (
-    <button
+    <EuiButtonEmpty
       className="rangeSlider__popoverAnchorButton"
       data-test-subj={`range-slider-control-${id}`}
       onClick={() => setIsPopoverOpen((openState) => !openState)}
@@ -75,7 +74,7 @@ export const RangeSliderComponent: FC<Props> = ({ typeaheadSubject, componentSta
         readOnly
         onChange={() => {}}
       />
-    </button>
+    </EuiButtonEmpty>
   );
 
   const roundedMin = floorWithPrecision(min, decimalPlaces);
