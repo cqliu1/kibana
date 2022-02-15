@@ -10,4 +10,5 @@ import { DataPublicPluginStart } from '../../../data/public';
 
 export interface ControlsDataService {
   autocomplete: DataPublicPluginStart['autocomplete'];
+  searchSource: DataPublicPluginStart['search']['searchSource'];
 }

@@ -24,8 +24,6 @@ export interface Props {
   max: number;
   onChange: (value: RangeValue) => void;
   step?: number;
-  showLabels?: boolean;
-  showRange?: boolean;
   isLoading?: boolean;
 }
 
@@ -36,8 +34,6 @@ export const RangeSliderPopover: FC<Props> = ({
   max,
   step,
   value,
-  showLabels,
-  showRange,
   onChange,
   isLoading,
 }) => {
@@ -53,7 +49,7 @@ export const RangeSliderPopover: FC<Props> = ({
       className="rangeSlider__popoverAnchorButton"
       data-test-subj={`range-slider-control-${id}`}
       onClick={() => setIsPopoverOpen((openState) => !openState)}
-      isLoading={isLoading}
+      isLoading={false}
     >
       <EuiDualRange
         value={value}
@@ -84,7 +80,6 @@ export const RangeSliderPopover: FC<Props> = ({
           max={max}
           min={min}
           onChange={onChange}
-          showRange={showRange}
           step={step}
           ticks={ticks}
           value={value}

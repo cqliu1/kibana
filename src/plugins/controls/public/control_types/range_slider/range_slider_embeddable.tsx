@@ -10,31 +10,33 @@ import {
   Filter,
   buildEsQuery,
   compareFilters,
-  buildPhraseFilter,
+  buildRangeFilter,
   buildPhrasesFilter,
 } from '@kbn/es-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { isEqual } from 'lodash';
+import { get, isEqual } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { merge, Subject, Subscription, BehaviorSubject } from 'rxjs';
 import { tap, debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
 
-import { RangeSliderComponent, RangeSliderComponentState } from './range_slider.component';
 import {
   withSuspense,
   LazyReduxEmbeddableWrapper,
   ReduxEmbeddableWrapperPropsWithChildren,
 } from '../../../../presentation_util/public';
-import { RangeSliderEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
-import { ControlsDataViewsService } from '../../services/data_views';
 import { Embeddable, IContainer } from '../../../../embeddable/public';
+import { DataView, DataViewField } from '../../../../data_views/public';
+
+import { ControlsDataViewsService } from '../../services/data_views';
 import { ControlsDataService } from '../../services/data';
-import { rangeSliderReducers } from './range_slider_reducers';
-import { RangeSliderStrings } from './range_slider_strings';
-import { DataView } from '../../../../data_views/public';
 import { ControlInput, ControlOutput } from '../..';
 import { pluginServices } from '../../services';
+
+import { RangeSliderComponent, RangeSliderComponentState } from './range_slider.component';
+import { rangeSliderReducers } from './range_slider_reducers';
+import { RangeSliderStrings } from './range_slider_strings';
+import { RangeSliderEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
 
 const RangeSliderReduxWrapper = withSuspense<
   ReduxEmbeddableWrapperPropsWithChildren<RangeSliderEmbeddableInput>
@@ -53,7 +55,6 @@ const diffDataFetchProps = (
 };
 
 interface RangeSliderDataFetchProps {
-  search?: string;
   fieldName: string;
   dataViewId: string;
   query?: ControlInput['query'];
@@ -74,10 +75,8 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
   private dataService: ControlsDataService;
   private dataViewsService: ControlsDataViewsService;
 
-  // Internal data fetching state for this input control.
-  private typeaheadSubject: Subject<string> = new Subject<string>();
   private dataView?: DataView;
-  private searchString = '';
+  private value?: RangeValue;
 
   // State to be passed down to component
   private componentState: RangeSliderComponentState;
@@ -98,36 +97,14 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
   }
 
   private setupSubscriptions = () => {
-    const dataFetchPipe = this.getInput$().pipe(
-      map((newInput) => ({
-        lastReloadRequestTime: newInput.lastReloadRequestTime,
-        dataViewId: newInput.dataViewId,
-        fieldName: newInput.fieldName,
-        timeRange: newInput.timeRange,
-        filters: newInput.filters,
-        query: newInput.query,
-      })),
-      distinctUntilChanged(diffDataFetchProps)
-    );
-
-    // push searchString changes into a debounced typeahead subject
-    this.typeaheadSubject = new Subject<string>();
-    const typeaheadPipe = this.typeaheadSubject.pipe(
-      tap((newSearchString) => (this.searchString = newSearchString)),
-      debounceTime(100)
-    );
-
-    // fetch available options when input changes or when search string has changed
-    this.subscriptions.add(
-      merge(dataFetchPipe, typeaheadPipe).subscribe(this.fetchAvailableOptions)
-    );
-
-    // build filters when selectedOptions change
+    // build filters when value change
     this.subscriptions.add(
       this.getInput$()
         .pipe(
           debounceTime(400),
-          distinctUntilChanged((a, b) => isEqual(a.selectedOptions, b.selectedOptions)),
+          distinctUntilChanged(
+            (a, b) => isEqual(a.value[0], b.value[0]) && isEqual(a.value[1], b.value[1])
+          ),
           skip(1) // skip the first input update because initial filters will be built by initialize.
         )
         .subscribe(() => this.buildFilter())
@@ -153,39 +130,93 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     this.componentStateSubject$.next(this.componentState);
   }
 
-  private fetchAvailableOptions = async () => {
+  private minMaxAgg = (field?: DataViewField) => {
+    const aggBody: any = {};
+    if (field) {
+      if (field.scripted) {
+        aggBody.script = {
+          source: field.script,
+          lang: field.lang,
+        };
+      } else {
+        aggBody.field = field.name;
+      }
+    }
+
+    return {
+      maxAgg: {
+        max: aggBody,
+      },
+      minAgg: {
+        min: aggBody,
+      },
+    };
+  };
+
+  private fetchMinMax = async () => {
     this.updateComponentState({ loading: true });
-    const { ignoreParentSettings, filters, fieldName, query } = this.getInput();
+    const { ignoreParentSettings, filters, fieldName } = this.getInput();
     const dataView = await this.getCurrentDataView();
     const field = dataView.getFieldByName(fieldName);
 
-    if (!field) throw fieldMissingError(fieldName);
+    if (!field) {
+      this.updateComponentState({ loading: false });
+      throw fieldMissingError(fieldName);
+    }
 
-    const boolFilter = [
-      buildEsQuery(
-        dataView,
-        ignoreParentSettings?.ignoreQuery ? [] : query ?? [],
-        ignoreParentSettings?.ignoreFilters ? [] : filters ?? []
-      ),
-    ];
+    const searchSource = await this.dataService.searchSource.create();
+    searchSource.setField('size', 0);
+    searchSource.setField('index', dataView);
+
+    const aggs = this.minMaxAgg(field);
+    searchSource.setField('aggs', aggs);
+
+    // const boolFilter = [
+    //   buildEsQuery(
+    //     dataView,
+    //     ignoreParentSettings?.ignoreQuery ? [] : query ?? [],
+    //     ignoreParentSettings?.ignoreFilters ? [] : filters ?? []
+    //   ),
+    // ];
+
+    searchSource.setField('filter', () => {
+      const activeFilters: Filter[] = ignoreParentSettings?.ignoreFilters ? [] : filters ?? [];
+      // if (useTimeFilter) {
+      //   const filter = timefilter.createFilter(indexPattern);
+      //   if (filter) {
+      //     activeFilters.push(filter);
+      //   }
+      // }
+      return activeFilters;
+    });
 
     // TODO Switch between `terms_agg` and `terms_enum` method depending on the value of ignoreParentSettings
     // const method = Object.values(ignoreParentSettings || {}).includes(false) ?
 
-    const newOptions = await this.dataService.autocomplete.getValueSuggestions({
-      query: this.searchString,
-      indexPattern: dataView,
-      useTimeRange: !ignoreParentSettings?.ignoreTimerange,
-      method: 'terms_agg', // terms_agg method is required to use timeRange
-      boolFilter,
-      field,
-    });
-    this.updateComponentState({ availableOptions: newOptions, loading: false });
+    let resp;
+    try {
+      resp = await searchSource.fetch();
+    } catch (error) {
+      // If the fetch was aborted then no need to surface this error in the UI
+      // if (error.name === 'AbortError') return;
+      // this.disable(
+      //   i18n.translate('inputControl.rangeControl.unableToFetchTooltip', {
+      //     defaultMessage: 'Unable to fetch range min and max, error: {errorMessage}',
+      //     values: { errorMessage: error.message },
+      //   })
+      // );
+      // return;
+    }
+
+    const min = get(resp, 'aggregations.minAgg.value', null);
+    const max = get(resp, 'aggregations.maxAgg.value', null);
+
+    this.updateComponentState({ min, max, loading: false });
   };
 
   private initialize = async () => {
-    const initialSelectedOptions = this.getInput().selectedOptions;
-    if (initialSelectedOptions) {
+    const initialValue = this.getInput().value;
+    if (initialValue) {
       await this.getCurrentDataView();
       await this.buildFilter();
     }
@@ -194,8 +225,11 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
   };
 
   private buildFilter = async () => {
-    const { fieldName, selectedOptions } = this.getInput();
-    if (!selectedOptions || selectedOptions.length === 0) {
+    const {
+      fieldName,
+      value: [min, max],
+    } = this.getInput();
+    if (!min || !max) {
       this.updateOutput({ filters: [] });
       return;
     }
@@ -204,19 +238,14 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
 
     if (!field) throw fieldMissingError(fieldName);
 
-    let newFilter: Filter;
-    if (selectedOptions.length === 1) {
-      newFilter = buildPhraseFilter(field, selectedOptions[0], dataView);
-    } else {
-      newFilter = buildPhrasesFilter(field, selectedOptions, dataView);
-    }
+    const newFilter = buildRangeFilter(field, { gte: min, lte: max }, dataView);
 
     newFilter.meta.key = field?.name;
     this.updateOutput({ filters: [newFilter] });
   };
 
   reload = () => {
-    this.fetchAvailableOptions();
+    this.fetchMinMax();
   };
 
   public destroy = () => {
@@ -231,10 +260,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     this.node = node;
     ReactDOM.render(
       <RangeSliderReduxWrapper embeddable={this} reducers={rangeSliderReducers}>
-        <RangeSliderComponent
-          componentStateSubject={this.componentStateSubject$}
-          typeaheadSubject={this.typeaheadSubject}
-        />
+        <RangeSliderComponent componentStateSubject={this.componentStateSubject$} />
       </RangeSliderReduxWrapper>,
       node
     );

@@ -8,7 +8,7 @@
 
 import { EuiButtonEmpty, EuiPopover, EuiDualRange } from '@elastic/eui';
 import React, { FC, useCallback, useState } from 'react';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { useReduxEmbeddableContext } from '../../../../presentation_util/public';
 import { useStateObservable } from '../../hooks/use_state_observable';
@@ -24,14 +24,14 @@ interface Props {
 }
 // Availableoptions and loading state is controled by the embeddable, but is not considered embeddable input.
 export interface RangeSliderComponentState {
-  min: number;
-  max: number;
+  min?: number;
+  max?: number;
   loading: boolean;
 }
 
-export const RangeSliderComponent: FC<Props> = ({ typeaheadSubject, componentStateSubject }) => {
+export const RangeSliderComponent: FC<Props> = ({ componentStateSubject }) => {
   // Redux embeddable Context to get state from Embeddable input
-  const { useEmbeddableDispatch, useEmbeddableSelector } = useReduxEmbeddableContext<
+  const { useEmbeddableSelector } = useReduxEmbeddableContext<
     RangeSliderEmbeddableInput,
     typeof rangeSliderReducers
   >();
@@ -70,7 +70,6 @@ export const RangeSliderComponent: FC<Props> = ({ typeaheadSubject, componentSta
       min={roundedMin}
       onChange={onChangeComplete}
       max={roundedMax}
-      showRange={showRange}
       step={step}
       isLoading={loading}
     />

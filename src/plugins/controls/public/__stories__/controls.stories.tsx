@@ -164,6 +164,7 @@ export const ConfiguredControlGroupStory = () => (
           fieldName: 'avgTicketPrice',
           value: ['3', '13'],
           step: 2,
+          loading: false,
         } as RangeSliderEmbeddableInput,
       },
     }}

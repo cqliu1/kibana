@@ -22,4 +22,7 @@ export const dataServiceFactory: DataServiceFactory = () => ({
   autocomplete: {
     getValueSuggestions: valueSuggestionMethod,
   } as unknown as DataPublicPluginStart['autocomplete'],
+  searchSource: {
+    create: () => {},
+  } as unknown as DataPublicPluginStart['autocomplete'],
 });
