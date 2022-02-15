@@ -16,6 +16,12 @@
   }
 }
 
+.rangeSlider__actions {
+  padding: $euiSizeS;
+  border-bottom: $euiBorderThin;
+  border-color: darken($euiColorLightestShade, 2%);
+}
+
 .rangeSlider--filterGroup {
   width: 100%;
 }
