@@ -63,42 +63,45 @@ export const RangeSliderComponent: FC<Props> = ({ typeaheadSubject, componentSta
   );
 
   const button = (
-    <EuiFilterButton
+    <button
       className="rangeSlider__popoverAnchorButton"
       data-test-subj={`range-slider-control-${id}`}
       onClick={() => setIsPopoverOpen((openState) => !openState)}
-      isSelected={isPopoverOpen}
     >
-      <EuiDualRange value={selectedValue} showInput="inputWithPopover" fullWidth readOnly />
-    </EuiFilterButton>
+      <EuiDualRange
+        value={selectedValue}
+        showInput="inputWithPopover"
+        fullWidth
+        readOnly
+        onChange={() => {}}
+      />
+    </button>
   );
 
   const roundedMin = floorWithPrecision(min, decimalPlaces);
   const roundedMax = ceilWithPrecision(max, decimalPlaces);
 
   return (
-    <EuiFilterGroup className="rangeSlider--filterGroup">
-      <EuiPopover
-        button={button}
-        isOpen={isPopoverOpen}
-        className="rangeSlider__popoverOverride"
-        anchorClassName="rangeSlider__anchorOverride"
-        closePopover={() => setIsPopoverOpen(false)}
-        panelPaddingSize="none"
-        anchorPosition="downCenter"
-        ownFocus
-        repositionOnScroll
-      >
-        <RangeSliderPopover
-          id={id}
-          value={selectedValue}
-          min={roundedMin}
-          onChange={onChangeComplete}
-          max={roundedMax}
-          showRange={showRange}
-          step={step}
-        />
-      </EuiPopover>
-    </EuiFilterGroup>
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      className="rangeSlider__popoverOverride"
+      anchorClassName="rangeSlider__anchorOverride"
+      closePopover={() => setIsPopoverOpen(false)}
+      panelPaddingSize="none"
+      anchorPosition="downCenter"
+      ownFocus
+      repositionOnScroll
+    >
+      <RangeSliderPopover
+        id={id}
+        value={selectedValue}
+        min={roundedMin}
+        onChange={onChangeComplete}
+        max={roundedMax}
+        showRange={showRange}
+        step={step}
+      />
+    </EuiPopover>
   );
 };
