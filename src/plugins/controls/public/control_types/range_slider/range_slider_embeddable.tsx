@@ -75,6 +75,8 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
   private componentState: RangeSliderComponentState;
   private componentStateSubject$ = new BehaviorSubject<RangeSliderComponentState>({
     loading: true,
+    min: 0,
+    max: 0,
   });
 
   constructor(input: RangeSliderEmbeddableInput, output: ControlOutput, parent?: IContainer) {
@@ -83,7 +85,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     // Destructure controls services
     ({ data: this.dataService, dataViews: this.dataViewsService } = pluginServices.getServices());
 
-    this.componentState = { loading: true };
+    this.componentState = { loading: true, min: 0, max: 0 };
     this.updateComponentState(this.componentState);
 
     this.initialize();
@@ -177,8 +179,8 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     const aggs = this.minMaxAgg(field);
     searchSource.setField('aggs', aggs);
 
-    searchSource.setField('filter', ignoreParentSettings?.ignoreFilters ? filters : []);
-    searchSource.setField('query', ignoreParentSettings?.ignoreQuery ? query : undefined);
+    searchSource.setField('filter', ignoreParentSettings?.ignoreFilters ? [] : filters || []);
+    searchSource.setField('query', ignoreParentSettings?.ignoreQuery ? undefined : query);
     console.log({ ignoreParentSettings });
     console.log({ query, filters });
 

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { debounce } from 'lodash';
 import React, { FC, useCallback, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
@@ -23,20 +24,19 @@ interface Props {
 }
 // Availableoptions and loading state is controled by the embeddable, but is not considered embeddable input.
 export interface RangeSliderComponentState {
-  min?: number;
-  max?: number;
+  min: number;
+  max: number;
   loading: boolean;
 }
 
 export const RangeSliderComponent: FC<Props> = ({ componentStateSubject }) => {
   // Redux embeddable Context to get state from Embeddable input
   const {
+    useEmbeddableDispatch,
     useEmbeddableSelector,
     actions: { selectRange },
   } = useReduxEmbeddableContext<RangeSliderEmbeddableInput, typeof rangeSliderReducers>();
-  const { value, decimalPlaces = 0, id, step, title } = useEmbeddableSelector((state) => state);
-
-  const [selectedValue, setSelectedValue] = useState<RangeValue>(value);
+  const dispatch = useEmbeddableDispatch();
 
   // useStateObservable to get component state from Embeddable
   const { loading, min, max } = useStateObservable<RangeSliderComponentState>(
@@ -44,12 +44,25 @@ export const RangeSliderComponent: FC<Props> = ({ componentStateSubject }) => {
     componentStateSubject.getValue()
   );
 
-  const onChangeComplete = useCallback(
-    (range: RangeValue) => {
-      selectRange(range);
-      setSelectedValue(range);
-    },
-    [selectRange, setSelectedValue]
+  const {
+    value = [min, max],
+    decimalPlaces = 0,
+    id,
+    step,
+    title,
+  } = useEmbeddableSelector((state) => state);
+
+  const [selectedValue, setSelectedValue] = useState<RangeValue>(value);
+
+  const onChangeComplete = debounce(
+    useCallback(
+      (range: RangeValue) => {
+        dispatch(selectRange(range));
+        setSelectedValue(range);
+      },
+      [selectRange, setSelectedValue, dispatch]
+    ),
+    400
   );
 
   const roundedMin = floorWithPrecision(min || Number(value[0]), decimalPlaces);
