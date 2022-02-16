@@ -30,7 +30,7 @@ import { pluginServices } from '../../services';
 import { RangeSliderComponent, RangeSliderComponentState } from './range_slider.component';
 import { rangeSliderReducers } from './range_slider_reducers';
 import { RangeSliderStrings } from './range_slider_strings';
-import { RangeSliderEmbeddableInput, RANGE_SLIDER_CONTROL, RangeValue } from './types';
+import { RangeSliderEmbeddableInput, RANGE_SLIDER_CONTROL } from './types';
 
 const RangeSliderReduxWrapper = withSuspense<
   ReduxEmbeddableWrapperPropsWithChildren<RangeSliderEmbeddableInput>

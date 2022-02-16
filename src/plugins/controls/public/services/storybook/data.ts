@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, of } from 'rxjs';
+import { of } from 'rxjs';
 import { PluginServiceFactory } from '../../../../presentation_util/public';
 import { DataPublicPluginStart } from '../../../../data/public';
 import { DataViewField } from '../../../../data_views/common';

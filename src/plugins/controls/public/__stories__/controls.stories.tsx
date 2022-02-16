@@ -205,8 +205,8 @@ export const RangeSliderControlGroupStory = () => (
         explicitInput: {
           id: 'rangeSlider3',
           title: 'Flight duration in hour',
-          dataViewId: 'demoDataFlights',
-          fieldName: 'FlightTimeHours',
+          dataViewId: 'demoDataFlight',
+          fieldName: 'FlightTimeHour',
           value: ['30', '600'],
           step: 30,
         } as RangeSliderEmbeddableInput,
