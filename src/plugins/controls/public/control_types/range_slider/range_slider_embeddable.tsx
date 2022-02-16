@@ -6,19 +6,13 @@
  * Side Public License, v 1.
  */
 
-import {
-  Filter,
-  buildEsQuery,
-  compareFilters,
-  buildRangeFilter,
-  buildPhrasesFilter,
-} from '@kbn/es-query';
+import { compareFilters, buildRangeFilter } from '@kbn/es-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { get, isEqual } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-import { merge, Subject, Subscription, BehaviorSubject } from 'rxjs';
-import { tap, debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
+import { Subscription, BehaviorSubject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, skip, map } from 'rxjs/operators';
 
 import {
   withSuspense,
@@ -36,7 +30,7 @@ import { pluginServices } from '../../services';
 import { RangeSliderComponent, RangeSliderComponentState } from './range_slider.component';
 import { rangeSliderReducers } from './range_slider_reducers';
 import { RangeSliderStrings } from './range_slider_strings';
-import { RangeSliderEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
+import { RangeSliderEmbeddableInput, RANGE_SLIDER_CONTROL, RangeValue } from './types';
 
 const RangeSliderReduxWrapper = withSuspense<
   ReduxEmbeddableWrapperPropsWithChildren<RangeSliderEmbeddableInput>
@@ -65,7 +59,7 @@ const fieldMissingError = (fieldName: string) =>
   new Error(`field ${fieldName} not found in index pattern`);
 
 export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput, ControlOutput> {
-  public readonly type = OPTIONS_LIST_CONTROL;
+  public readonly type = RANGE_SLIDER_CONTROL;
   public deferEmbeddableLoad = true;
 
   private subscriptions: Subscription = new Subscription();
@@ -76,7 +70,6 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
   private dataViewsService: ControlsDataViewsService;
 
   private dataView?: DataView;
-  private value?: RangeValue;
 
   // State to be passed down to component
   private componentState: RangeSliderComponentState;
@@ -97,14 +90,27 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
   }
 
   private setupSubscriptions = () => {
+    const dataFetchPipe = this.getInput$().pipe(
+      map((newInput) => ({
+        lastReloadRequestTime: newInput.lastReloadRequestTime,
+        dataViewId: newInput.dataViewId,
+        fieldName: newInput.fieldName,
+        timeRange: newInput.timeRange,
+        filters: newInput.filters,
+        query: newInput.query,
+      })),
+      distinctUntilChanged(diffDataFetchProps)
+    );
+
+    // fetch available options when input changes or when search string has changed
+    this.subscriptions.add(dataFetchPipe.subscribe(this.fetchMinMax));
+
     // build filters when value change
     this.subscriptions.add(
       this.getInput$()
         .pipe(
           debounceTime(400),
-          distinctUntilChanged(
-            (a, b) => isEqual(a.value[0], b.value[0]) && isEqual(a.value[1], b.value[1])
-          ),
+          distinctUntilChanged((a, b) => isEqual(a.value, b.value)),
           skip(1) // skip the first input update because initial filters will be built by initialize.
         )
         .subscribe(() => this.buildFilter())
@@ -155,7 +161,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
 
   private fetchMinMax = async () => {
     this.updateComponentState({ loading: true });
-    const { ignoreParentSettings, filters, fieldName } = this.getInput();
+    const { ignoreParentSettings, filters, fieldName, query } = this.getInput();
     const dataView = await this.getCurrentDataView();
     const field = dataView.getFieldByName(fieldName);
 
@@ -171,45 +177,17 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     const aggs = this.minMaxAgg(field);
     searchSource.setField('aggs', aggs);
 
-    // const boolFilter = [
-    //   buildEsQuery(
-    //     dataView,
-    //     ignoreParentSettings?.ignoreQuery ? [] : query ?? [],
-    //     ignoreParentSettings?.ignoreFilters ? [] : filters ?? []
-    //   ),
-    // ];
+    searchSource.setField('filter', ignoreParentSettings?.ignoreFilters ? filters : []);
+    searchSource.setField('query', ignoreParentSettings?.ignoreQuery ? query : undefined);
+    console.log({ ignoreParentSettings });
+    console.log({ query, filters });
 
-    searchSource.setField('filter', () => {
-      const activeFilters: Filter[] = ignoreParentSettings?.ignoreFilters ? [] : filters ?? [];
-      // if (useTimeFilter) {
-      //   const filter = timefilter.createFilter(indexPattern);
-      //   if (filter) {
-      //     activeFilters.push(filter);
-      //   }
-      // }
-      return activeFilters;
-    });
+    const resp = await searchSource.fetch$().toPromise();
 
-    // TODO Switch between `terms_agg` and `terms_enum` method depending on the value of ignoreParentSettings
-    // const method = Object.values(ignoreParentSettings || {}).includes(false) ?
+    console.log(resp);
 
-    let resp;
-    try {
-      resp = await searchSource.fetch();
-    } catch (error) {
-      // If the fetch was aborted then no need to surface this error in the UI
-      // if (error.name === 'AbortError') return;
-      // this.disable(
-      //   i18n.translate('inputControl.rangeControl.unableToFetchTooltip', {
-      //     defaultMessage: 'Unable to fetch range min and max, error: {errorMessage}',
-      //     values: { errorMessage: error.message },
-      //   })
-      // );
-      // return;
-    }
-
-    const min = get(resp, 'aggregations.minAgg.value', null);
-    const max = get(resp, 'aggregations.maxAgg.value', null);
+    const min = get(resp, 'rawResponse.aggregations.minAgg.value', null);
+    const max = get(resp, 'rawResponse.aggregations.maxAgg.value', null);
 
     this.updateComponentState({ min, max, loading: false });
   };
@@ -238,10 +216,12 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
 
     if (!field) throw fieldMissingError(fieldName);
 
-    const newFilter = buildRangeFilter(field, { gte: min, lte: max }, dataView);
+    const rangeFilter = buildRangeFilter(field, { gte: min, lte: max }, dataView);
 
-    newFilter.meta.key = field?.name;
-    this.updateOutput({ filters: [newFilter] });
+    console.log({ rangeFilter });
+
+    rangeFilter.meta.key = field?.name;
+    this.updateOutput({ filters: [rangeFilter] });
   };
 
   reload = () => {

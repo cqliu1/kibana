@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonEmpty, EuiPopover, EuiDualRange } from '@elastic/eui';
 import React, { FC, useCallback, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
@@ -31,18 +30,11 @@ export interface RangeSliderComponentState {
 
 export const RangeSliderComponent: FC<Props> = ({ componentStateSubject }) => {
   // Redux embeddable Context to get state from Embeddable input
-  const { useEmbeddableSelector } = useReduxEmbeddableContext<
-    RangeSliderEmbeddableInput,
-    typeof rangeSliderReducers
-  >();
   const {
-    value,
-    showRange,
-    decimalPlaces = 0,
-    id,
-    step,
-    title,
-  } = useEmbeddableSelector((state) => state);
+    useEmbeddableSelector,
+    actions: { selectRange },
+  } = useReduxEmbeddableContext<RangeSliderEmbeddableInput, typeof rangeSliderReducers>();
+  const { value, decimalPlaces = 0, id, step, title } = useEmbeddableSelector((state) => state);
 
   const [selectedValue, setSelectedValue] = useState<RangeValue>(value);
 
@@ -53,25 +45,26 @@ export const RangeSliderComponent: FC<Props> = ({ componentStateSubject }) => {
   );
 
   const onChangeComplete = useCallback(
-    (newValue: RangeValue) => {
-      setSelectedValue(newValue);
+    (range: RangeValue) => {
+      selectRange(range);
+      setSelectedValue(range);
     },
-    [setSelectedValue]
+    [selectRange, setSelectedValue]
   );
 
-  const roundedMin = floorWithPrecision(min, decimalPlaces);
-  const roundedMax = ceilWithPrecision(max, decimalPlaces);
+  const roundedMin = floorWithPrecision(min || Number(value[0]), decimalPlaces);
+  const roundedMax = ceilWithPrecision(max || Number(value[1]), decimalPlaces);
 
   return (
     <RangeSliderPopover
       id={id}
-      title={title}
-      value={selectedValue}
+      isLoading={loading}
       min={roundedMin}
-      onChange={onChangeComplete}
       max={roundedMax}
       step={step}
-      isLoading={loading}
+      title={title}
+      value={selectedValue}
+      onChange={onChangeComplete}
     />
   );
 };

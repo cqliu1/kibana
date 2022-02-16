@@ -21,5 +21,4 @@ export interface RangeSliderEmbeddableInput extends ControlInput {
   showValue?: boolean;
   showRange?: boolean;
   decimalPlaces?: number;
-  loading?: boolean;
 }

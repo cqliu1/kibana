@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { BehaviorSubject, of } from 'rxjs';
 import { PluginServiceFactory } from '../../../../presentation_util/public';
 import { DataPublicPluginStart } from '../../../../data/public';
 import { DataViewField } from '../../../../data_views/common';
@@ -23,6 +24,14 @@ export const dataServiceFactory: DataServiceFactory = () => ({
     getValueSuggestions: valueSuggestionMethod,
   } as unknown as DataPublicPluginStart['autocomplete'],
   searchSource: {
-    create: () => {},
-  } as unknown as DataPublicPluginStart['autocomplete'],
+    create: () => ({
+      setField: () => {},
+      fetch$: () =>
+        of({
+          resp: {
+            rawResponse: { aggregations: { minAgg: { value: 0 }, maxAgg: { value: 1000 } } },
+          },
+        }),
+    }),
+  } as unknown as DataPublicPluginStart['search']['searchSource'],
 });

@@ -158,13 +158,57 @@ export const ConfiguredControlGroupStory = () => (
         width: 'auto',
         explicitInput: {
           id: 'rangeSlider1',
-          width: 'auto',
           title: 'Average ticket price',
           dataViewId: 'demoDataFlights',
-          fieldName: 'avgTicketPrice',
-          value: ['3', '13'],
+          fieldName: 'AvgTicketPrice',
+          value: ['4', '12'],
           step: 2,
-          loading: false,
+        } as RangeSliderEmbeddableInput,
+      },
+    }}
+  />
+);
+
+export const RangeSliderControlGroupStory = () => (
+  <ControlGroupStoryComponent
+    panels={{
+      rangeSlider1: {
+        type: RANGE_SLIDER_CONTROL,
+        order: 1,
+        width: 'auto',
+        explicitInput: {
+          id: 'rangeSlider1',
+          title: 'Average ticket price',
+          dataViewId: 'demoDataFlights',
+          fieldName: 'AvgTicketPrice',
+          value: ['4', '12'],
+          step: 2,
+        } as RangeSliderEmbeddableInput,
+      },
+      rangeSlider2: {
+        type: RANGE_SLIDER_CONTROL,
+        order: 2,
+        width: 'auto',
+        explicitInput: {
+          id: 'rangeSlider2',
+          title: 'Total distance in miles',
+          dataViewId: 'demoDataFlights',
+          fieldName: 'DistanceMiles',
+          value: ['0', '100'],
+          step: 10,
+        } as RangeSliderEmbeddableInput,
+      },
+      rangeSlider3: {
+        type: RANGE_SLIDER_CONTROL,
+        order: 3,
+        width: 'auto',
+        explicitInput: {
+          id: 'rangeSlider3',
+          title: 'Flight duration in hour',
+          dataViewId: 'demoDataFlights',
+          fieldName: 'FlightTimeHours',
+          value: ['30', '600'],
+          step: 30,
         } as RangeSliderEmbeddableInput,
       },
     }}
@@ -178,7 +222,7 @@ export const RangeSliderPopoverStory = () => (
       width: 'auto',
       title: 'Average ticket price',
       dataViewId: 'demoDataFlights',
-      fieldName: 'avgTicketPrice',
+      fieldName: 'AvgTicketPrice',
       value: ['3', '13'],
       step: 2,
       min: 0,

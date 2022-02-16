@@ -9,7 +9,7 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
 
-import { RangeSliderEmbeddableInput } from './types';
+import { RangeSliderEmbeddableInput, RangeValue } from './types';
 
 export const rangeSliderReducers = {
   // deselectRange: (
@@ -26,9 +26,9 @@ export const rangeSliderReducers = {
   // },
   selectRange: (
     state: WritableDraft<RangeSliderEmbeddableInput>,
-    action: PayloadAction<string>
+    action: PayloadAction<RangeValue>
   ) => {
-    state.value?.push(action.payload);
+    state.value = action.payload;
   },
   // replaceSelection: (
   //   state: WritableDraft<RangeSliderEmbeddableInput>,

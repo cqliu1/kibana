@@ -6,15 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useMemo, useState } from 'react';
-import { EuiButtonEmpty, EuiDualRange, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import React, { FC, useState } from 'react';
+import { EuiFilterButton, EuiDualRange, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import { ValidatedDualRange } from '../../../../kibana_react/public';
 
-import { RangeSliderEmbeddableInput, RangeValue } from './types';
-import { RangeSliderStrings } from './range_slider_strings';
-import { rangeSliderReducers } from './range_slider_reducers';
-import { RangeSliderComponentState } from './range_slider.component';
-import { useReduxEmbeddableContext } from '../../../../presentation_util/public';
+import { RangeValue } from './types';
 
 export interface Props {
   id: string;
@@ -45,20 +41,23 @@ export const RangeSliderPopover: FC<Props> = ({
   ];
 
   const button = (
-    <EuiButtonEmpty
+    <EuiFilterButton
       className="rangeSlider__popoverAnchorButton"
       data-test-subj={`range-slider-control-${id}`}
       onClick={() => setIsPopoverOpen((openState) => !openState)}
-      isLoading={false}
+      isLoading={isLoading}
+      isSelected={isPopoverOpen}
     >
       <EuiDualRange
+        min={min}
+        max={max}
         value={value}
         showInput="inputWithPopover"
         fullWidth
         readOnly
         onChange={() => {}}
       />
-    </EuiButtonEmpty>
+    </EuiFilterButton>
   );
 
   return (
