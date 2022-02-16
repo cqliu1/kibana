@@ -227,7 +227,7 @@ export const RangeSliderPopoverStory = () => (
       step: 2,
       min: 0,
       max: 20,
-      componentStateSubject: { loading: false, min: 0, max: 20 },
+      isLoading: true,
       onChange: action('onChange'),
     }}
   />
