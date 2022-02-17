@@ -7,7 +7,7 @@
  */
 
 import React, { FC, useState } from 'react';
-import { EuiFilterButton, EuiDualRange, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import { EuiFieldNumber, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import { ValidatedDualRange } from '../../../../kibana_react/public';
 
 import { RangeValue } from './types';
@@ -41,14 +41,19 @@ export const RangeSliderPopover: FC<Props> = ({
   ];
 
   const button = (
-    <EuiFilterButton
-      className="rangeSlider__popoverAnchorButton"
-      data-test-subj={`range-slider-control-${id}`}
-      onClick={() => setIsPopoverOpen((openState) => !openState)}
-      isLoading={isLoading}
-      isSelected={isPopoverOpen}
-    >
-      <EuiDualRange
+    <button onClick={() => setIsPopoverOpen((openState) => !openState)} className="customButton">
+      <EuiFieldNumber readOnly value={min} />
+      <EuiText className="customButton__delimeter" size="s" color="subdued">
+        →
+      </EuiText>
+      <EuiFieldNumber readOnly value={max} />
+    </button>
+    // className="rangeSlider__popoverAnchorButton"
+    // data-test-subj={`range-slider-control-${id}`}
+    // onClick={() => setIsPopoverOpen((openState) => !openState)}
+    // isLoading={isLoading}
+    // isSelected={isPopoverOpen}
+    /* <EuiDualRange
         min={min}
         max={max}
         value={value}
@@ -56,8 +61,7 @@ export const RangeSliderPopover: FC<Props> = ({
         fullWidth
         readOnly
         onChange={() => {}}
-      />
-    </EuiFilterButton>
+      /> */
   );
 
   return (
