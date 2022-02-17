@@ -7,7 +7,14 @@
  */
 
 import React, { FC, useState } from 'react';
-import { EuiFieldNumber, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiFieldNumber,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiText,
+} from '@elastic/eui';
 import { ValidatedDualRange } from '../../../../kibana_react/public';
 
 import { RangeValue } from './types';
@@ -42,11 +49,19 @@ export const RangeSliderPopover: FC<Props> = ({
 
   const button = (
     <button onClick={() => setIsPopoverOpen((openState) => !openState)} className="customButton">
-      <EuiFieldNumber readOnly value={min} />
-      <EuiText className="customButton__delimeter" size="s" color="subdued">
-        →
-      </EuiText>
-      <EuiFieldNumber readOnly value={max} />
+      <EuiFlexGroup responsive={false} gutterSize="none">
+        <EuiFlexItem>
+          <EuiFieldNumber readOnly value={min} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText className="customButton__delimeter" size="s" color="subdued">
+            →
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFieldNumber readOnly value={max} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </button>
     // className="rangeSlider__popoverAnchorButton"
     // data-test-subj={`range-slider-control-${id}`}
