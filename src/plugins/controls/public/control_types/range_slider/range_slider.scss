@@ -1,37 +1,36 @@
-.rangeSlider__anchorOverride {
-  display:block;
-}
-
 .rangeSlider__popoverOverride {
-  width: 100%;
   height: 100%;
 }
 
-.rangeSlider__popoverAnchorButton {
-  width:100%;
-}
-
-.rangeSlider__actions {
-  padding: $euiSizeS;
-  border-bottom: $euiBorderThin;
-  border-color: darken($euiColorLightestShade, 2%);
-}
-
-.rangeSlider--filterGroup {
-  width: 100%;
-}
-
-.customButton {
-  background-color: #fbfcfd;
-  border-radius: 0 5px 5px 0;
+.rangeSliderAnchor__button {
+  display: flex;
+  align-items: center;
   width: 100%;
   height: 100%;
-  .customButton__delimiter {
-    background-color: lightblue !important;
+  justify-content: space-between;
+  background-color: $euiFormBackgroundColor;
+  @include euiFormControlSideBorderRadius($euiFormControlBorderRadius, $side: 'right', $internal: true);
+
+  .rangeSliderAnchor__delimiter {
+    background-color: unset;
   }
-  .euiFieldNumber {
+  .rangeSliderAnchor__fieldNumber {
+    font-weight: $euiFontWeightBold;
     box-shadow: none;
-    background-color: transparent;
     text-align: center;
+    background-color: unset;
+
+    // Hide arrows from input number
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+    }
+    &[type=number] {
+      -moz-appearance: textfield;
+    }
+  }
+
+  .rangeSliderAnchor__spinner {
+    padding-right: $euiSizeS;
   }
 }

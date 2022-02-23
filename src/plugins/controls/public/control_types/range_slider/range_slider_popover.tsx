@@ -14,6 +14,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiText,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { ValidatedDualRange } from '../../../../kibana_react/public';
 
@@ -48,45 +49,33 @@ export const RangeSliderPopover: FC<Props> = ({
   ];
 
   const button = (
-    <button onClick={() => setIsPopoverOpen((openState) => !openState)} className="customButton">
-      <EuiFlexGroup responsive={false} gutterSize="none">
-        <EuiFlexItem>
-          <EuiFieldNumber readOnly value={min} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText className="customButton__delimeter" size="s" color="subdued">
-            →
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFieldNumber readOnly value={max} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <button
+      onClick={() => setIsPopoverOpen((openState) => !openState)}
+      className="rangeSliderAnchor__button"
+      data-test-subj={`range-slider-control-${id}`}
+    >
+      <EuiFieldNumber controlOnly className="rangeSliderAnchor__fieldNumber" readOnly value={min} />
+      <EuiText className="rangeSliderAnchor__delimiter" size="s" color="subdued">
+        →
+      </EuiText>
+      <EuiFieldNumber controlOnly className="rangeSliderAnchor__fieldNumber" readOnly value={max} />
+      {isLoading ? (
+        <div className="rangeSliderAnchor__spinner">
+          <EuiLoadingSpinner />
+        </div>
+      ) : undefined}
     </button>
-    // className="rangeSlider__popoverAnchorButton"
-    // data-test-subj={`range-slider-control-${id}`}
-    // onClick={() => setIsPopoverOpen((openState) => !openState)}
-    // isLoading={isLoading}
-    // isSelected={isPopoverOpen}
-    /* <EuiDualRange
-        min={min}
-        max={max}
-        value={value}
-        showInput="inputWithPopover"
-        fullWidth
-        readOnly
-        onChange={() => {}}
-      /> */
   );
 
   return (
     <EuiPopover
       button={button}
       isOpen={isPopoverOpen}
+      display="block"
+      panelPaddingSize="s"
       className="rangeSlider__popoverOverride"
       anchorClassName="rangeSlider__anchorOverride"
       closePopover={() => setIsPopoverOpen(false)}
-      panelPaddingSize="none"
       anchorPosition="downCenter"
       ownFocus
       repositionOnScroll
