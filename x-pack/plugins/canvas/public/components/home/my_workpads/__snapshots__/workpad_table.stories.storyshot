@@ -373,6 +373,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                     className="euiLink euiLink--primary"
                     data-test-subj="canvasWorkpadTableWorkpad"
                     href="/workpad/workpad-2"
+                    onClick={[Function]}
                     rel="noreferrer"
                   >
                     <span>
@@ -547,6 +548,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                     className="euiLink euiLink--primary"
                     data-test-subj="canvasWorkpadTableWorkpad"
                     href="/workpad/workpad-1"
+                    onClick={[Function]}
                     rel="noreferrer"
                   >
                     <span>
@@ -721,6 +723,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
                     className="euiLink euiLink--primary"
                     data-test-subj="canvasWorkpadTableWorkpad"
                     href="/workpad/workpad-0"
+                    onClick={[Function]}
                     rel="noreferrer"
                   >
                     <span>
