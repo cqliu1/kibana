@@ -42,7 +42,7 @@ export const RangeSliderComponent: FC<Props> = ({ componentStateSubject }) => {
     componentStateSubject.getValue()
   );
 
-  const { value, id, title } = useEmbeddableSelector((state) => state);
+  const { value, decimalPlaces = 0, step = 1, id, title } = useEmbeddableSelector((state) => state);
 
   const [selectedValue, setSelectedValue] = useState<RangeValue>(value || [undefined, undefined]);
 
@@ -60,6 +60,8 @@ export const RangeSliderComponent: FC<Props> = ({ componentStateSubject }) => {
       isLoading={loading}
       min={min}
       max={max}
+      decimalPlaces={decimalPlaces}
+      step={step}
       title={title}
       value={selectedValue}
       onChange={onChangeComplete}

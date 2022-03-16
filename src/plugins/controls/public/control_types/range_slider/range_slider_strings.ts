@@ -36,6 +36,14 @@ export const RangeSliderStrings = {
       i18n.translate('controls.rangeSlider.editor.fieldTitle', {
         defaultMessage: 'Field',
       }),
+    getDecimalPlacesTitle: () =>
+      i18n.translate('controls.rangeSlider.editor.decimalPlacesTitle', {
+        defaultMessage: 'Decimal places',
+      }),
+    getStepTitle: () =>
+      i18n.translate('controls.rangeSlider.editor.stepSizeTitle', {
+        defaultMessage: 'Step size',
+      }),
   },
   popover: {
     getLoadingMessage: () =>

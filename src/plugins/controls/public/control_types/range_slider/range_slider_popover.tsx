@@ -20,7 +20,7 @@ import {
   EuiDualRange,
 } from '@elastic/eui';
 
-// import { ceilWithPrecision, floorWithPrecision } from './lib/round_with_precision';
+import { ceilWithPrecision, floorWithPrecision } from './lib/round_with_precision';
 import { RangeValue } from './types';
 
 export interface Props {
@@ -31,6 +31,8 @@ export interface Props {
   title?: string;
   value: RangeValue;
   onChange: (value: RangeValue) => void;
+  step: number;
+  decimalPlaces: number;
 }
 
 export const RangeSliderPopover: FC<Props> = ({
@@ -41,6 +43,8 @@ export const RangeSliderPopover: FC<Props> = ({
   title,
   value = ['', ''],
   onChange,
+  decimalPlaces,
+  step,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const rangeRef = useRef();
@@ -60,13 +64,17 @@ export const RangeSliderPopover: FC<Props> = ({
     helpText = 'There is no data to display. Adjust the time range and filters.';
   }
 
-  // const roundedLowerBound = hasLowerBoundSelection ? Math.floor(lowerBoundValue) : lowerBoundValue;
-  // const roundedUpperBound = hasUpperBoundSelection ? Math.ceil(upperBoundValue) : upperBoundValue;
+  const roundedLowerBound = hasLowerBoundSelection
+    ? floorWithPrecision(lowerBoundValue, decimalPlaces)
+    : lowerBoundValue;
+  const roundedUpperBound = hasUpperBoundSelection
+    ? ceilWithPrecision(upperBoundValue, decimalPlaces)
+    : upperBoundValue;
   const roundedMin = hasAvailableRange ? Math.floor(minValue) : minValue;
-  const roundedMax = hasAvailableRange ? Math.ceil(maxValue) : maxValue;
+  let roundedMax = hasAvailableRange ? Math.ceil(maxValue) : maxValue;
 
-  const isLowerSelectionInvalid = hasLowerBoundSelection && lowerBoundValue > roundedMax;
-  const isUpperSelectionInvalid = hasUpperBoundSelection && upperBoundValue < roundedMin;
+  const isLowerSelectionInvalid = hasLowerBoundSelection && roundedLowerBound > roundedMax;
+  const isUpperSelectionInvalid = hasUpperBoundSelection && roundedUpperBound < roundedMin;
   const isSelectionInvalid =
     hasAvailableRange && (isLowerSelectionInvalid || isUpperSelectionInvalid);
 
@@ -74,24 +82,32 @@ export const RangeSliderPopover: FC<Props> = ({
     helpText = 'Selected range is outside of available data. No filter was applied.';
   }
 
-  if (lowerBoundValue > upperBoundValue) {
+  if (roundedLowerBound > roundedUpperBound) {
     errorMessage = 'Upper value must be greater than or equal to lower value.';
   }
 
   const rangeSliderMin = Math.min(
     roundedMin,
-    isNaN(lowerBoundValue) ? Infinity : lowerBoundValue,
-    isNaN(upperBoundValue) ? Infinity : upperBoundValue
+    isNaN(roundedLowerBound) ? Infinity : roundedLowerBound,
+    isNaN(roundedUpperBound) ? Infinity : roundedUpperBound
   );
   const rangeSliderMax = Math.max(
     roundedMax,
-    isNaN(lowerBoundValue) ? -Infinity : lowerBoundValue,
-    isNaN(upperBoundValue) ? -Infinity : upperBoundValue
+    isNaN(roundedLowerBound) ? -Infinity : roundedLowerBound,
+    isNaN(roundedUpperBound) ? -Infinity : roundedUpperBound
   );
 
   const displayedValue = [
-    hasLowerBoundSelection ? String(lowerBoundValue) : hasAvailableRange ? String(roundedMin) : '',
-    hasUpperBoundSelection ? String(upperBoundValue) : hasAvailableRange ? String(roundedMax) : '',
+    hasLowerBoundSelection
+      ? String(roundedLowerBound)
+      : hasAvailableRange
+      ? String(roundedMin)
+      : '',
+    hasUpperBoundSelection
+      ? String(roundedUpperBound)
+      : hasAvailableRange
+      ? String(roundedMax)
+      : '',
   ] as RangeValue;
 
   const ticks = [];
@@ -101,6 +117,12 @@ export const RangeSliderPopover: FC<Props> = ({
     ticks.push({ value: rangeSliderMin, label: rangeSliderMin });
     ticks.push({ value: rangeSliderMax, label: rangeSliderMax });
     levels.push({ min: roundedMin, max: roundedMax, color: 'success' });
+  }
+
+  // Round max value up to a multiple of the step interval
+  if (hasAvailableRange && step > 1) {
+    roundedMax =
+      ceilWithPrecision((roundedMax - roundedMin) / step, decimalPlaces) * step + roundedMin;
   }
 
   const button = (
@@ -116,13 +138,14 @@ export const RangeSliderPopover: FC<Props> = ({
             ? 'rangeSliderAnchor__fieldNumber--invalid'
             : ''
         }`}
-        value={hasLowerBoundSelection ? lowerBoundValue : ''}
+        value={hasLowerBoundSelection ? roundedLowerBound : ''}
         onChange={(event) => {
-          onChange([event.target.value, isNaN(upperBoundValue) ? '' : String(upperBoundValue)]);
+          onChange([event.target.value, isNaN(roundedUpperBound) ? '' : String(roundedUpperBound)]);
         }}
         disabled={!hasAvailableRange || isLoading}
         placeholder={`${hasAvailableRange ? roundedMin : ''}`}
         isInvalid={isLowerSelectionInvalid}
+        step={hasAvailableRange ? step : undefined}
       />
       <EuiText className="rangeSliderAnchor__delimiter" size="s" color="subdued">
         →
@@ -134,13 +157,14 @@ export const RangeSliderPopover: FC<Props> = ({
             ? 'rangeSliderAnchor__fieldNumber--invalid'
             : ''
         }`}
-        value={hasUpperBoundSelection ? upperBoundValue : ''}
+        value={hasUpperBoundSelection ? roundedUpperBound : ''}
         onChange={(event) => {
-          onChange([isNaN(lowerBoundValue) ? '' : String(lowerBoundValue), event.target.value]);
+          onChange([isNaN(roundedLowerBound) ? '' : String(roundedLowerBound), event.target.value]);
         }}
         disabled={!hasAvailableRange || isLoading}
         placeholder={`${hasAvailableRange ? roundedMax : ''}`}
         isInvalid={isUpperSelectionInvalid}
+        step={hasAvailableRange ? step : undefined}
       />
       {isLoading ? (
         <div className="rangeSliderAnchor__spinner">
@@ -182,7 +206,7 @@ export const RangeSliderPopover: FC<Props> = ({
 
               onChange([updatedLowerBound, updatedUpperBound]);
             }}
-            // step={hasAvailableRange ? step : undefined}
+            step={hasAvailableRange ? step : undefined}
             value={displayedValue}
             ticks={hasAvailableRange ? ticks : undefined}
             levels={hasAvailableRange ? levels : undefined}

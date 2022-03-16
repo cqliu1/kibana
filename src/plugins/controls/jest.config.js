@@ -6,16 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ControlInput } from '../../types';
-
-export const RANGE_SLIDER_CONTROL = 'rangeSliderControl';
-
-export type RangeValue = [string, string];
-
-export interface RangeSliderEmbeddableInput extends ControlInput {
-  fieldName: string;
-  dataViewId: string;
-  value: RangeValue;
-  step?: number;
-  decimalPlaces?: number;
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../..',
+  roots: ['<rootDir>/src/plugins/controls'],
+};
