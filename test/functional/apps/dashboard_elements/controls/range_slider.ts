@@ -11,13 +11,15 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const retry = getService('retry');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const filterBar = getService('filterBar');
-  const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
-  const { dashboardControls, timePicker, common, dashboard } = getPageObjects([
+  const queryBar = getService('queryBar');
+  const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
+  const { dashboardControls, timePicker, common, dashboard, header } = getPageObjects([
     'dashboardControls',
     'timePicker',
     'dashboard',
@@ -210,6 +212,129 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboardControls.rangeSliderGetDualRangeAttribute(secondId, 'disabled')
         ).to.be('true');
         expect((await testSubjects.getVisibleText('rangeSlider__helpText')).length).to.be.above(0);
+      });
+    });
+
+    describe('Interactions between range list and dashboard', async () => {
+      let controlId: string;
+      before(async () => {
+        await dashboardControls.clearAllControls();
+        await timePicker.setDefaultAbsoluteRange();
+        controlId = (await dashboardControls.getAllControlIds())[0];
+        await dashboardControls.rangeSliderClearSelection(controlId);
+        await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
+        await dashboardControls.createRangeSliderControl({
+          dataViewTitle: '',
+          fieldName: 'sound.keyword',
+          title: 'Animal Sounds',
+        });
+      });
+
+      describe('Apply dashboard query and filters to range slider controls', async () => {
+        after(async () => {
+          await filterBar.removeAllFilters();
+        });
+
+        it('applies dashboard query to range slider control', async () => {
+          await queryBar.setQuery('AvgTicketPrice > 500 ');
+          await queryBar.submitQuery();
+          await dashboard.waitForRenderComplete();
+          await header.waitUntilLoadingHasFinished();
+          await dashboardControls.rangeSliderOpenPopover(controlId);
+          await retry.try(async () => {
+            expect(
+              await dashboardControls.rangeSliderGetLowerBoundAttribute(controlId, 'placeholder')
+            ).to.be(5);
+            expect(
+              await dashboardControls.rangeSliderGetUpperBoundAttribute(controlId, 'placeholder')
+            ).to.be(5);
+          });
+          await queryBar.setQuery('');
+          await queryBar.submitQuery();
+        });
+
+        it('Applies dashboard filters to range slider control', async () => {
+          await filterBar.addFilter('AvgTicketPrice', 'is between', ['300', '800']);
+          await dashboard.waitForRenderComplete();
+          await header.waitUntilLoadingHasFinished();
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await retry.try(async () => {
+            expect(
+              await dashboardControls.rangeSliderGetLowerBoundAttribute(controlId, 'placeholder')
+            ).to.be(5);
+            expect(
+              await dashboardControls.rangeSliderGetUpperBoundAttribute(controlId, 'placeholder')
+            ).to.be(5);
+          });
+        });
+
+        it('Does not apply disabled dashboard filters to range slider control', async () => {
+          await filterBar.toggleFilterEnabled('AvgTicketPrice');
+          await dashboard.waitForRenderComplete();
+          await header.waitUntilLoadingHasFinished();
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await retry.try(async () => {
+            expect(
+              await dashboardControls.rangeSliderGetLowerBoundAttribute(controlId, 'placeholder')
+            ).to.be(5);
+            expect(
+              await dashboardControls.rangeSliderGetUpperBoundAttribute(controlId, 'placeholder')
+            ).to.be(5);
+          });
+          await filterBar.toggleFilterEnabled('sound.keyword');
+          await dashboard.waitForRenderComplete();
+          await header.waitUntilLoadingHasFinished();
+        });
+      });
+
+      describe('Selections made in control apply to dashboard', async () => {
+        after(async () => {
+          await dashboardControls.rangeSliderClearSelection(controlId);
+          await dashboardControls.rangeSliderEnsurePopoverIsClosed(controlId);
+        });
+
+        it('Shows available range in range slider with no selection by default', async () => {
+          // await dashboardControls.optionsListOpenPopover(controlId);
+          // await retry.try(async () => {
+          //   expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(8);
+          // });
+          // await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+        });
+
+        it('Can set lower bound selection without selecting upper bound', async () => {
+          // await dashboardControls.optionsListOpenPopover(controlId);
+          // await dashboardControls.optionsListPopoverSelectOption('hiss');
+          // await dashboardControls.optionsListPopoverSelectOption('grr');
+          // await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+        });
+
+        it('Can set upper bound selection without selecting lower bound', async () => {
+          // await dashboardControls.optionsListOpenPopover(controlId);
+          // await dashboardControls.optionsListPopoverSelectOption('hiss');
+          // await dashboardControls.optionsListPopoverSelectOption('grr');
+          // await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+        });
+
+        it('shows selection in control', async () => {
+          // const selectionString = await dashboardControls.optionsListGetSelectionsString(controlId);
+          // expect(selectionString).to.be('hiss, grr');
+        });
+
+        it('applies selected range to dashboard', async () => {
+          // await retry.try(async () => {
+          //   expect(await pieChart.getPieSliceCount()).to.be(2);
+          // });
+        });
+
+        it('Applies selected range to dashboard by default on open', async () => {
+          // await dashboard.gotoDashboardLandingPage();
+          // await header.waitUntilLoadingHasFinished();
+          // await dashboard.clickUnsavedChangesContinueEditing('New Dashboard');
+          // await header.waitUntilLoadingHasFinished();
+          // expect(await pieChart.getPieSliceCount()).to.be(2);
+          // const selectionString = await dashboardControls.optionsListGetSelectionsString(controlId);
+          // expect(selectionString).to.be('hiss, grr');
+        });
       });
     });
   });
