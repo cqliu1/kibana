@@ -13,6 +13,7 @@ import {
   urlDrilldownGlobalScopeProvider,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { UrlDrilldown } from './lib';
 
 export interface SetupDependencies {
@@ -23,6 +24,7 @@ export interface SetupDependencies {
 export interface StartDependencies {
   embeddable: EmbeddableStart;
   uiActionsEnhanced: AdvancedUiActionsStart;
+  usageCollection: UsageCollectionStart;
 }
 
 // eslint-disable-next-line
@@ -49,6 +51,19 @@ export class UrlDrilldownPlugin
         getVariablesHelpDocsLink: () =>
           startServices().core.docLinks.links.dashboard.urlDrilldownVariables,
         uiSettings: core.uiSettings,
+        reportUiCounter: (
+          appName: string,
+          type: string,
+          eventNames: string | string[],
+          count?: number | undefined
+        ) => {
+          startServices().plugins.usageCollection?.reportUiCounter(
+            appName,
+            type,
+            eventNames,
+            count
+          );
+        },
       })
     );
 

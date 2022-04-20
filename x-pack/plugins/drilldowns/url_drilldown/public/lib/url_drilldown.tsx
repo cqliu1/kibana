@@ -32,6 +32,8 @@ import {
   urlDrilldownCompileUrl,
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
 } from '@kbn/ui-actions-enhanced-plugin/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { txtUrlDrilldownDisplayName } from './i18n';
 import { getEventVariableList, getEventScopeValues } from './variables/event_variables';
 import { getContextVariableList, getContextScopeValues } from './variables/context_variables';
@@ -53,6 +55,7 @@ interface UrlDrilldownDeps {
   getSyntaxHelpDocsLink: () => string;
   getVariablesHelpDocsLink: () => string;
   uiSettings: IUiSettingsClient;
+  reportUiCounter: UsageCollectionStart['reportUiCounter'];
 }
 
 export type ActionContext = ChartActionContext<EmbeddableWithQueryInput>;
@@ -174,6 +177,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
   };
 
   public readonly execute = async (config: Config, context: ActionContext) => {
+    this.deps.reportUiCounter('drilldowns', METRIC_TYPE.CLICK, ['all', URL_DRILLDOWN]);
     const url = await this.getHref(config, context);
     if (config.openInNewTab) {
       window.open(url, '_blank', 'noopener');

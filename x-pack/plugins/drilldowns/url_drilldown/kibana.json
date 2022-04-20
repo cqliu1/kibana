@@ -9,5 +9,6 @@
   },
   "description": "Adds drilldown implementations to Kibana",
   "requiredPlugins": ["embeddable", "uiActions", "uiActionsEnhanced"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact"]
+  "requiredBundles": ["kibanaUtils", "kibanaReact"],
+  "optionalPlugins": ["usageCollection"]
 }

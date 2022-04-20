@@ -9,6 +9,7 @@ import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/cor
 import { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import {
   AdvancedUiActionsSetup,
   AdvancedUiActionsStart,
@@ -28,6 +29,7 @@ export interface StartDependencies {
   embeddable: EmbeddableStart;
   share: SharePluginStart;
   dashboard: DashboardStart;
+  usageCollection: UsageCollectionStart;
 }
 
 // eslint-disable-next-line

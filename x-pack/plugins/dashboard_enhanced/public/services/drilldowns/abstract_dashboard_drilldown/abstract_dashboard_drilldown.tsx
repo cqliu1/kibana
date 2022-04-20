@@ -20,16 +20,20 @@ import {
   StartServicesGetter,
   UiComponent,
 } from '@kbn/kibana-utils-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { DrilldownConfig } from '../../../../common/drilldowns/dashboard_drilldown/types';
 import { CollectConfigContainer } from './components';
 import { txtGoToDashboard } from './i18n';
 import { Config } from './types';
+import { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from '../embeddable_to_dashboard_drilldown';
 
 export interface Params {
   start: StartServicesGetter<{
     uiActionsEnhanced: AdvancedUiActionsStart;
     data: DataPublicPluginStart;
     dashboard: DashboardStart;
+    usageCollection: UsageCollectionStart;
   }>;
 }
 
@@ -87,6 +91,13 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
   };
 
   public readonly execute = async (config: Config, context: Context) => {
+    console.log('execute');
+    this.params
+      .start()
+      .plugins.usageCollection?.reportUiCounter('drilldowns', METRIC_TYPE.CLICK, [
+        'all',
+        EMBEDDABLE_TO_DASHBOARD_DRILLDOWN,
+      ]);
     if (config.openInNewTab) {
       window.open(await this.getHref(config, context), '_blank');
     } else {
