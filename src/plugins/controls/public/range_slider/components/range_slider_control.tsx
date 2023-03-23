@@ -69,6 +69,7 @@ export const RangeSliderControl: FC = () => {
       <EuiFlexGroup gutterSize="none" responsive={false}>
         <EuiFlexItem>
           <EuiFieldNumber
+            compressed
             controlOnly
             fullWidth
             className={`rangeSliderAnchor__fieldNumber ${
@@ -96,6 +97,7 @@ export const RangeSliderControl: FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldNumber
+            compressed
             controlOnly
             fullWidth
             className={`rangeSliderAnchor__fieldNumber ${

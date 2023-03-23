@@ -145,6 +145,7 @@ export const ControlFrame = ({
         'controlFrameFormControlLayout--twoLine': controlStyle === 'twoLine',
       })}
       fullWidth
+      compressed
       prepend={
         <>
           {(embeddable && customPrepend) ?? null}

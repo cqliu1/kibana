@@ -36,7 +36,7 @@ export const ToolbarButton: React.FunctionComponent<Props> = ({
       : { color: 'text', css: ToolbarButtonStyles(euiTheme).emptyButton };
 
   return (
-    <EuiButton size="m" {...toolbarButtonStyleProps} {...{ iconSide, ...rest }}>
+    <EuiButton size="s" {...toolbarButtonStyleProps} {...{ iconSide, ...rest }}>
       {label}
     </EuiButton>
   );

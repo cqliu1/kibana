@@ -71,7 +71,7 @@ export const IconButtonGroup = ({ buttons, legend }: Props) => {
 
   return (
     <EuiButtonGroup
-      buttonSize="m"
+      buttonSize="s"
       legend={legend}
       options={buttonGroupOptions}
       onChange={onChangeIconsMulti}
