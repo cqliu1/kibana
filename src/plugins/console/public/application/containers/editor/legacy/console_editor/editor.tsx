@@ -282,8 +282,11 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
 
   useEffect(() => {
     if (paste?.text) {
-      const { current: editor } = editorInstanceRef;
-      editor!.update('# Pasted from Help Center\n', paste.text);
+      const editor = editorInstanceRef.current?.getCoreEditor();
+      const lineCount = editor!.getLineCount();
+      const lastColumn = editor!.getLineValue(lineCount).length;
+      editor!.moveCursorToPosition({ lineNumber: lineCount, column: lastColumn });
+      editor!.insert(`\n# Pasted from Help Center\n ${paste.text}`);
     }
   }, [paste]);
 
