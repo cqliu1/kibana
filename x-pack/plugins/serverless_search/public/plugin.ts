@@ -149,7 +149,7 @@ export class ServerlessSearchPlugin
     });
 
     core.helpCenter.configure({
-      helpCenterUrl: 'https://www.elastic.co/docs/current/serverless/',
+      helpCenterUrl: 'http://localhost:5173/docs/current/serverless',
       version: '0.0.1',
       helpTopics: {
         [HELP_CENTER_ES_HOME]: createItem(HELP_CENTER_ES_HOME),

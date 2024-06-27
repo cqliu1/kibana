@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { RenderingService } from './src';
+export { RenderingService, HelpCenterWrapper } from './src';

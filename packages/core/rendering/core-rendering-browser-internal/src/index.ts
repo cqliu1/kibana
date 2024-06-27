@@ -7,3 +7,4 @@
  */
 
 export { RenderingService } from './rendering_service';
+export { HelpCenterWrapper } from './app_containers';

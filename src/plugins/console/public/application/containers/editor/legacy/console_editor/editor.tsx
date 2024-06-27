@@ -20,6 +20,7 @@ import { decompressFromEncodedURIComponent } from 'lz-string';
 import { parse } from 'query-string';
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
 import { ace } from '@kbn/es-ui-shared-plugin/public';
+import { pasteText, useAppSelector } from '@elastic/help-center-host';
 import { ConsoleMenu } from '../../../../components';
 import { useEditorReadContext, useServicesContext } from '../../../../contexts';
 import {
@@ -276,6 +277,15 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
       setEditorInstance(editor);
     }
   }, [setEditorInstance]);
+
+  const paste = useAppSelector(pasteText.selectors.selectPasteText);
+
+  useEffect(() => {
+    if (paste?.text) {
+      const { current: editor } = editorInstanceRef;
+      editor!.update(paste.text);
+    }
+  }, [paste]);
 
   return (
     <div style={abs} data-test-subj="console-application" className="conApp">
