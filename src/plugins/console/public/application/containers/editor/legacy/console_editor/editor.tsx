@@ -283,7 +283,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
   useEffect(() => {
     if (paste?.text) {
       const { current: editor } = editorInstanceRef;
-      editor!.update(paste.text);
+      editor!.update('# Pasted from Help Center\n', paste.text);
     }
   }, [paste]);
 
