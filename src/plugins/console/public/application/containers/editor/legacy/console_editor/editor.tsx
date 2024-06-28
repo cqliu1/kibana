@@ -284,11 +284,8 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
     console.log('console useEffect', { paste });
     if (paste?.text && paste?.targetId === 'console') {
       const editor = editorInstanceRef.current?.getCoreEditor();
-      const lineCount = editor!.getLineCount();
-      const lastColumn = editor!.getLineValue(lineCount).length;
-      console.log({ lineCount, lastColumn });
-      editor!.moveCursorToPosition({ lineNumber: lineCount, column: lastColumn + 1 });
-      editor!.insert(`\n\n# Pasted from Help Center\n${paste.text}`);
+      editor!.moveCursorToPosition({ lineNumber: 1, column: 1 });
+      editor!.insert(`# Pasted from Help Center\n${paste.text}\n\n`);
     }
   }, [paste]);
 
