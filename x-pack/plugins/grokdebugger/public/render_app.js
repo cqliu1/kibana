@@ -14,10 +14,13 @@ import { GrokdebuggerService } from './services/grokdebugger/grokdebugger_servic
 import { InactiveLicenseSlate } from './components/inactive_license';
 
 export function renderApp(license, element, coreStart, theme$) {
+  const HelpCenterProvider = coreStart.helpCenter.getProvider();
   const content = license.isActive ? (
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={{ ...coreStart }}>
-        <GrokDebugger grokdebuggerService={new GrokdebuggerService(coreStart.http)} />
+        <HelpCenterProvider>
+          <GrokDebugger grokdebuggerService={new GrokdebuggerService(coreStart.http)} />
+        </HelpCenterProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>
   ) : (

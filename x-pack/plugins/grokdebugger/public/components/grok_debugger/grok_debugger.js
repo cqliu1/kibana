@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 // Prefer importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
@@ -19,6 +19,7 @@ import { EventOutput } from '../event_output';
 import { GrokdebuggerRequest } from '../../models/grokdebugger_request';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { pasteText, useAppSelector } from '@elastic/help-center-host';
 
 const i18nTexts = {
   simulate: {
@@ -31,62 +32,58 @@ const i18nTexts = {
   },
 };
 
-export class GrokDebuggerComponent extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      rawEvent: '',
-      pattern: '',
-      customPatterns: '',
-      structuredEvent: {},
-    };
-    this.grokdebuggerRequest = new GrokdebuggerRequest();
-  }
+export const GrokDebuggerComponent = (props) => {
+  const [rawEvent, setRawEvent] = useState('');
+  const [pattern, setPattern] = useState('');
+  const [customPatterns, setCustomPatterns] = useState('');
+  const [structuredEvent, setStructuredEvent] = useState({});
+  const [grokdebuggerRequest] = useState(new GrokdebuggerRequest());
 
-  onRawEventChange = (rawEvent) => {
-    this.setState({ rawEvent });
-    this.grokdebuggerRequest.rawEvent = rawEvent.trimEnd();
-  };
+  const onRawEventChange = useCallback(
+    (rawEvent) => {
+      setRawEvent(rawEvent);
+      grokdebuggerRequest.rawEvent = rawEvent.trimEnd();
+    },
+    [grokdebuggerRequest]
+  );
 
-  onPatternChange = (pattern) => {
-    this.setState({ pattern });
-    this.grokdebuggerRequest.pattern = pattern.trimEnd();
-  };
+  const onPatternChange = useCallback((pattern) => {
+    setPattern(pattern);
+    grokdebuggerRequest.pattern = pattern.trimEnd();
+  }, []);
 
-  onCustomPatternsChange = (customPatterns) => {
-    this.setState({ customPatterns });
+  const onCustomPatternsChange = useCallback(
+    (customPatterns) => {
+      setCustomPatterns(customPatterns);
+      customPatterns = customPatterns.trim();
+      const customPatternsObj = {};
 
-    customPatterns = customPatterns.trim();
-    const customPatternsObj = {};
-
-    if (!customPatterns) {
-      this.grokdebuggerRequest.customPatterns = customPatternsObj;
-      return;
-    }
-
-    customPatterns.split('\n').forEach((customPattern) => {
-      // Patterns are defined like so:
-      // patternName patternDefinition
-      // For example:
-      // POSTGRESQL %{DATESTAMP:timestamp} %{TZ} %{DATA:user_id} %{GREEDYDATA:connection_id} %{POSINT:pid}
-      const [, patternName, patternDefinition] = customPattern.match(/(\S+)\s+(.+)/) || [];
-      if (patternName && patternDefinition) {
-        customPatternsObj[patternName] = patternDefinition;
+      if (!customPatterns) {
+        grokdebuggerRequest.customPatterns = customPatternsObj;
+        return;
       }
-    });
 
-    this.grokdebuggerRequest.customPatterns = customPatternsObj;
-  };
-
-  simulateGrok = async () => {
-    const notifications = this.props.kibana.services.notifications;
-    try {
-      const simulateResponse = await this.props.grokdebuggerService.simulate(
-        this.grokdebuggerRequest
-      );
-      this.setState({
-        structuredEvent: simulateResponse.structuredEvent,
+      customPatterns.split('\n').forEach((customPattern) => {
+        // Patterns are defined like so:
+        // patternName patternDefinition
+        // For example:
+        // POSTGRESQL %{DATESTAMP:timestamp} %{TZ} %{DATA:user_id} %{GREEDYDATA:connection_id} %{POSINT:pid}
+        const [, patternName, patternDefinition] = customPattern.match(/(\S+)\s+(.+)/) || [];
+        if (patternName && patternDefinition) {
+          customPatternsObj[patternName] = patternDefinition;
+        }
       });
+
+      grokdebuggerRequest.customPatterns = customPatternsObj;
+    },
+    [grokdebuggerRequest]
+  );
+
+  const simulateGrok = useCallback(async () => {
+    const notifications = props.kibana.services.notifications;
+    try {
+      const simulateResponse = await props.grokdebuggerService.simulate(grokdebuggerRequest);
+      setStructuredEvent(simulateResponse.structuredEvent);
 
       if (!isEmpty(simulateResponse.error)) {
         notifications.toasts.addDanger({
@@ -99,54 +96,67 @@ export class GrokDebuggerComponent extends React.Component {
         title: i18nTexts.simulate.unknownErrorTitle,
       });
     }
-  };
+  }, [grokdebuggerRequest, props.grokdebuggerService, props.kibana.services.notifications]);
 
-  onSimulateClick = () => {
-    this.setState(
-      {
-        structuredEvent: {},
-      },
-      this.simulateGrok
-    );
-  };
+  const onSimulateClick = useCallback(() => {
+    setStructuredEvent({});
+    simulateGrok();
+  }, [simulateGrok]);
 
-  isSimulateDisabled = () => {
-    return this.state.rawEvent.trim() === '' || this.state.pattern.trim() === '';
-  };
+  const isSimulateDisabled = useCallback(() => {
+    return rawEvent.trim() === '' || pattern.trim() === '';
+  }, [pattern, rawEvent]);
 
-  render() {
-    return (
-      <EuiPage>
-        <EuiPageBody>
-          <EuiPageSection grow={true} color="plain">
-            <EuiForm className="grokdebugger-container" data-test-subj="grokDebuggerContainer">
-              <EventInput value={this.state.rawEvent} onChange={this.onRawEventChange} />
-              <PatternInput value={this.state.pattern} onChange={this.onPatternChange} />
-              <EuiSpacer />
-              <CustomPatternsInput
-                value={this.state.customPatterns}
-                onChange={this.onCustomPatternsChange}
+  const paste = useAppSelector(pasteText.selectors.selectPasteText);
+
+  useEffect(() => {
+    if (paste?.text) {
+      const { text, targetId } = paste;
+
+      if (targetId === 'sample-data') {
+        onRawEventChange(text);
+      }
+      if (targetId === 'grok-pattern') {
+        onPatternChange(text);
+      }
+      if (targetId === 'custom-patterns') {
+        onCustomPatternsChange(text);
+      }
+    }
+  }, [onCustomPatternsChange, onPatternChange, onRawEventChange, paste]);
+
+  return (
+    <EuiPage>
+      <EuiPageBody>
+        <EuiPageSection grow={true} color="plain">
+          <EuiForm className="grokdebugger-container" data-test-subj="grokDebuggerContainer">
+            <EventInput value={rawEvent} onChange={onRawEventChange} />
+            <PatternInput value={pattern} onChange={onPatternChange} />
+            <EuiSpacer />
+            <CustomPatternsInput
+              value={customPatterns}
+              onChange={onCustomPatternsChange}
+              isOpen={customPatterns.trim().length > 0}
+            />
+            <EuiSpacer />
+            <EuiButton
+              fill
+              onClick={onSimulateClick}
+              isDisabled={isSimulateDisabled()}
+              data-test-subj="btnSimulate"
+            >
+              <FormattedMessage
+                id="xpack.grokDebugger.simulateButtonLabel"
+                defaultMessage="Simulate"
               />
-              <EuiSpacer />
-              <EuiButton
-                fill
-                onClick={this.onSimulateClick}
-                isDisabled={this.isSimulateDisabled()}
-                data-test-subj="btnSimulate"
-              >
-                <FormattedMessage
-                  id="xpack.grokDebugger.simulateButtonLabel"
-                  defaultMessage="Simulate"
-                />
-              </EuiButton>
-              <EuiSpacer />
-              <EventOutput value={this.state.structuredEvent} />
-            </EuiForm>
-          </EuiPageSection>
-        </EuiPageBody>
-      </EuiPage>
-    );
-  }
-}
+            </EuiButton>
+            <EuiSpacer />
+            <EventOutput value={structuredEvent} />
+          </EuiForm>
+        </EuiPageSection>
+      </EuiPageBody>
+    </EuiPage>
+  );
+};
 
 export const GrokDebugger = withKibana(GrokDebuggerComponent);

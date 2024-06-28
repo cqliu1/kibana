@@ -12,7 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CodeEditor } from '@kbn/code-editor';
 
-export function CustomPatternsInput({ value, onChange }) {
+export function CustomPatternsInput({ value, onChange, isOpen }) {
+  console.log({ isOpen });
   const sampleCustomPatterns = `POSTFIX_QUEUEID [0-9A-F]{10,11}
 MSG message-id=<%{GREEDYDATA}>`;
 
@@ -26,6 +27,7 @@ MSG message-id=<%{GREEDYDATA}>`;
         />
       }
       data-test-subj="btnToggleCustomPatternsInput"
+      initialIsOpen={isOpen}
     >
       <EuiSpacer size="m" />
 

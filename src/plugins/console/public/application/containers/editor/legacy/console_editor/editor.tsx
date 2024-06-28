@@ -281,12 +281,14 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
   const paste = useAppSelector(pasteText.selectors.selectPasteText);
 
   useEffect(() => {
-    if (paste?.text) {
+    console.log('console useEffect', { paste });
+    if (paste?.text && paste?.targetId === 'console') {
       const editor = editorInstanceRef.current?.getCoreEditor();
       const lineCount = editor!.getLineCount();
       const lastColumn = editor!.getLineValue(lineCount).length;
-      editor!.moveCursorToPosition({ lineNumber: lineCount, column: lastColumn });
-      editor!.insert(`\n# Pasted from Help Center\n ${paste.text}`);
+      console.log({ lineCount, lastColumn });
+      editor!.moveCursorToPosition({ lineNumber: lineCount, column: lastColumn + 1 });
+      editor!.insert(`\n\n# Pasted from Help Center\n${paste.text}`);
     }
   }, [paste]);
 
