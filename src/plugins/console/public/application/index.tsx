@@ -13,7 +13,7 @@ import { HttpSetup, NotificationsSetup, DocLinksStart } from '@kbn/core/public';
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { HelpCenterWrapper } from '@kbn/core-rendering-browser-internal';
+import { HelpCenterStart } from '@kbn/core-help-center-browser';
 import {
   createStorage,
   createHistory,
@@ -38,6 +38,7 @@ export interface BootDependencies extends ConsoleStartServices {
   docLinks: DocLinksStart['links'];
   autocompleteInfo: AutocompleteInfo;
   isMonacoEnabled: boolean;
+  helpCenter: HelpCenterStart;
 }
 
 export async function renderApp({
@@ -69,39 +70,39 @@ export async function renderApp({
 
   autocompleteInfo.mapping.setup(http, settings);
 
-  const { helpCenterUrl$, helpTopics$, version$ } = helpCenter;
+  const HelpCenterProvider = helpCenter.getProvider();
 
   render(
     <KibanaRenderContextProvider {...startServices}>
-      <HelpCenterWrapper {...{ helpCenterUrl$, helpTopics$, version$ }}>
-        <ServicesContextProvider
-          value={{
-            ...startServices,
-            docLinkVersion,
-            docLinks,
-            services: {
-              esHostService,
-              storage,
-              history,
-              settings,
-              notifications,
-              trackUiMetric,
-              objectStorageClient,
-              http,
-              autocompleteInfo,
-            },
-            config: {
-              isMonacoEnabled,
-            },
-          }}
-        >
-          <RequestContextProvider>
-            <EditorContextProvider settings={settings.toJSON()}>
+      <ServicesContextProvider
+        value={{
+          ...startServices,
+          docLinkVersion,
+          docLinks,
+          services: {
+            esHostService,
+            storage,
+            history,
+            settings,
+            notifications,
+            trackUiMetric,
+            objectStorageClient,
+            http,
+            autocompleteInfo,
+          },
+          config: {
+            isMonacoEnabled,
+          },
+        }}
+      >
+        <RequestContextProvider>
+          <EditorContextProvider settings={settings.toJSON()}>
+            <HelpCenterProvider>
               <Main />
-            </EditorContextProvider>
-          </RequestContextProvider>
-        </ServicesContextProvider>
-      </HelpCenterWrapper>
+            </HelpCenterProvider>
+          </EditorContextProvider>
+        </RequestContextProvider>
+      </ServicesContextProvider>
     </KibanaRenderContextProvider>,
     element
   );

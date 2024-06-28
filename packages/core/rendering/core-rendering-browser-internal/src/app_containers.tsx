@@ -37,13 +37,9 @@ export const HelpCenterWrapper: FC<
     version$: Observable<string | undefined>;
   }>
 > = ({ helpTopics$, version$, helpCenterUrl$, children }) => {
-  const helpTopics = useObservable(helpTopics$);
-  const version = useObservable(version$);
-  const helpCenterUrl = useObservable(helpCenterUrl$);
-
-  if (!helpTopics || !version || !helpCenterUrl) {
-    return <>{children}</>;
-  }
+  const helpTopics = useObservable(helpTopics$, {});
+  const version = useObservable(version$, '') || '';
+  const helpCenterUrl = useObservable(helpCenterUrl$, '') || '';
 
   return (
     <HostContextProvider {...{ helpCenterUrl, helpTopics, version }}>

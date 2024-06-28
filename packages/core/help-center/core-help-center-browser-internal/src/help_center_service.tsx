@@ -6,16 +6,29 @@
  * Side Public License, v 1.
  */
 
+import React, { PropsWithChildren } from 'react';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { shareReplay, takeUntil, map } from 'rxjs';
 import type { HelpCenterSetup, HelpCenterStart } from '@kbn/core-help-center-browser';
 import { HelpTopic } from '@elastic/help-center-common';
+import { HelpCenterWrapper } from '@kbn/core-rendering-browser-internal';
 
 export class HelpCenterService {
   private helpCenterUrl$ = new BehaviorSubject<string | undefined>(undefined);
   private helpTopics$ = new BehaviorSubject<Record<string, HelpTopic>>({});
   private version$ = new BehaviorSubject<string | undefined>(undefined);
   private stop$ = new Subject<void>();
+  private Provider = (props: PropsWithChildren<{}>) => (
+    <HelpCenterWrapper
+      {...{
+        helpTopics$: this.helpTopics$,
+        version$: this.version$,
+        helpCenterUrl$: this.helpCenterUrl$,
+      }}
+    >
+      {props.children}
+    </HelpCenterWrapper>
+  );
 
   /**
    * @public
@@ -56,6 +69,7 @@ export class HelpCenterService {
       helpCenterUrl$: this.helpCenterUrl$.pipe(takeUntil(this.stop$), shareReplay(1)),
       helpTopics$: this.helpTopics$.pipe(takeUntil(this.stop$), shareReplay(1)),
       version$: this.version$.pipe(takeUntil(this.stop$), shareReplay(1)),
+      getProvider: () => this.Provider,
     };
   }
 

@@ -1826,21 +1826,15 @@
   resolved "https://registry.yarnpkg.com/@elastic/filesaver/-/filesaver-1.1.2.tgz#1998ffb3cd89c9da4ec12a7793bfcae10e30c77a"
   integrity sha512-YZbSufYFBhAj+S2cJgiKALoxIJevqXN2MSr6Yqr42rJdaPuM31cj6pUDwflkql1oDjupqD9la+MfxPFjXI1JFQ==
 
-"@elastic/help-center-common@0.0.1", "@elastic/help-center-common@^0.0.1":
-  version "0.0.1"
-  dependencies:
-    "@reduxjs/toolkit" "^1.9.7"
-    redux-dynamic-middlewares "^2.2.0"
+"@elastic/help-center-common@^0.0.1":
+  version "0.0.0"
+  uid ""
 
 "@elastic/help-center-common@link:../help-center-sdk/packages/common":
   version "0.0.0"
   uid ""
 
 "@elastic/help-center-host@link:../help-center-sdk/packages/host":
-  version "0.0.0"
-  uid ""
-
-"@elastic/help-center@link:../help-center-sdk/packages/help_center":
   version "0.0.0"
   uid ""
 

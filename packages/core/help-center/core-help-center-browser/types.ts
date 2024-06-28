@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { PropsWithChildren } from 'react';
 import { Observable } from 'rxjs';
 import { HelpTopic } from '@elastic/help-center-common';
 
@@ -14,6 +15,7 @@ export interface HelpCenterStart {
   hasHelpTopics$: Observable<boolean>;
   version$: Observable<string | undefined>;
   helpCenterUrl$: Observable<string | undefined>;
+  getProvider: () => (props: PropsWithChildren<{}>) => JSX.Element;
 }
 
 export interface HelpCenterSetup {
