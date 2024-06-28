@@ -281,7 +281,6 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
   const paste = useAppSelector(pasteText.selectors.selectPasteText);
 
   useEffect(() => {
-    console.log('console useEffect', { paste });
     if (paste?.text && paste?.targetId === 'console') {
       const editor = editorInstanceRef.current?.getCoreEditor();
       editor!.moveCursorToPosition({ lineNumber: 1, column: 1 });

@@ -47,10 +47,13 @@ export const GrokDebuggerComponent = (props) => {
     [grokdebuggerRequest]
   );
 
-  const onPatternChange = useCallback((pattern) => {
-    setPattern(pattern);
-    grokdebuggerRequest.pattern = pattern.trimEnd();
-  }, []);
+  const onPatternChange = useCallback(
+    (pattern) => {
+      setPattern(pattern);
+      grokdebuggerRequest.pattern = pattern.trimEnd();
+    },
+    [grokdebuggerRequest]
+  );
 
   const onCustomPatternsChange = useCallback(
     (customPatterns) => {
