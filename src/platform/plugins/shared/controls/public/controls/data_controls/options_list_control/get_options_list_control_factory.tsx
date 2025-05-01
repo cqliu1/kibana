@@ -41,6 +41,7 @@ import { OptionsListEditorOptions } from './components/options_list_editor_optio
 import {
   DEFAULT_SEARCH_TECHNIQUE,
   MIN_OPTIONS_LIST_REQUEST_SIZE,
+  OPTIONS_LIST_DEFAULT_EXCLUDE,
   OPTIONS_LIST_DEFAULT_SORT,
 } from './constants';
 import { fetchAndValidate$ } from './fetch_and_validate';
@@ -321,6 +322,8 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         defaultState: {
           searchTechnique: DEFAULT_SEARCH_TECHNIQUE,
           sort: OPTIONS_LIST_DEFAULT_SORT,
+          exclude: false,
+          existsSelected: false,
         },
         onReset: (lastSaved) => {
           dataControl.reinitializeState(lastSaved?.rawState);
