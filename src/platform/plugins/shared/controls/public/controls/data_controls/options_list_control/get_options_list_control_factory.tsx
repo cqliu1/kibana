@@ -41,7 +41,6 @@ import { OptionsListEditorOptions } from './components/options_list_editor_optio
 import {
   DEFAULT_SEARCH_TECHNIQUE,
   MIN_OPTIONS_LIST_REQUEST_SIZE,
-  OPTIONS_LIST_DEFAULT_EXCLUDE,
   OPTIONS_LIST_DEFAULT_SORT,
 } from './constants';
 import { fetchAndValidate$ } from './fetch_and_validate';
